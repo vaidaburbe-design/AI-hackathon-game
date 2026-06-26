@@ -1,10 +1,10 @@
-# Project Name
+# AI Hackathon Game
 
-AI game for hackathon project.
+A collaborative hackathon project by **Vaida** and **Ina** — building an AI-powered game to learn, experiment, and explore what it's like to code together.
 
 ## About
 
-Describe what this project does and why it exists.
+This repository is our hackathon playground. Vaida and Ina are teaming up to create a game with AI — not just to ship a demo, but to learn along the way. The main goal is to try collaborative coding: comparing ideas, pairing on problems, and seeing how two approaches come together in one project. It's a hands-on way to practice building together and discover what works when you co-create in real time.
 
 ## Features
 
