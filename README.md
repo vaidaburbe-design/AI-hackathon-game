@@ -1,6 +1,6 @@
 # Project Name
 
-Brief one-line description of your project.
+AI game for hackathon project.
 
 ## About
 
