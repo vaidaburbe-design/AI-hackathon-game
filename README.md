@@ -1,6 +1,6 @@
 # Project Name
 
-AI game for hackathon project.
+AI game for hackathon project. By Vaida and Ina
 
 ## About
 
