@@ -1,0 +1,1005 @@
+@import "tailwindcss";
+
+:root {
+  --paper: #fffef8;
+  --paper-dark: #f5f0e6;
+  --paper-line: #c8daf5;
+  --paper-margin: #f5b5b5;
+  --ink: #2d2a26;
+  --ink-light: #5c564e;
+  --sketch-line: #2d2a26;
+  --accent: #ff6b6b;
+  --safe: #7ec8a3;
+  --marker-yellow: #fff59d;
+  --marker-green: #b8f0c8;
+  --marker-pink: #ffc9d4;
+  --marker-blue: #b8e0ff;
+  --marker-orange: #ffd4a3;
+  --doodle-shadow: 3px 4px 0 rgba(45, 42, 38, 0.18);
+  --doodle-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.doodle-filters {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+body {
+  font-family: "Patrick Hand", "Comic Sans MS", cursive;
+  font-size: 1.05rem;
+  color: var(--ink);
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(90deg, transparent 39px, var(--paper-margin) 39px, var(--paper-margin) 41px, transparent 41px),
+    repeating-linear-gradient(
+      transparent,
+      transparent 27px,
+      var(--paper-line) 27px,
+      var(--paper-line) 28px
+    );
+  background-size: 100% 28px;
+  background-attachment: local;
+}
+
+/* ── Doodle primitives ── */
+
+.sketch-border {
+  border: 2.5px solid var(--sketch-line);
+  border-radius: var(--doodle-radius);
+  box-shadow: var(--doodle-shadow);
+}
+
+.doodle-title {
+  font-family: "Caveat", cursive;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.doodle-label {
+  font-family: "Caveat", cursive;
+  font-size: 1.05em;
+  letter-spacing: 0.03em;
+}
+
+.doodle-underline {
+  position: relative;
+  display: inline-block;
+}
+
+.doodle-underline::after {
+  content: "";
+  position: absolute;
+  left: -4%;
+  right: -4%;
+  bottom: -6px;
+  height: 8px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 8' preserveAspectRatio='none'%3E%3Cpath d='M0 4 Q25 0 50 4 T100 4 T150 5 T200 3' fill='none' stroke='%23ffd966' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  pointer-events: none;
+}
+
+.sketch-label {
+  font-family: "Caveat", cursive;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+/* ── Layout ── */
+
+.game-screen {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  max-width: 100%;
+  max-height: 100%;
+  padding: clamp(0.5rem, 2vw, 1rem);
+  gap: 0.5rem;
+}
+
+.game-hud {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.25rem 0.35rem;
+}
+
+.hud-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.game-title {
+  margin: 0;
+  font-size: clamp(1.4rem, 3.5vw, 2rem);
+  line-height: 1.1;
+  transform: rotate(-0.5deg);
+}
+
+.round-info {
+  margin: 0.15rem 0 0;
+  font-size: 0.95rem;
+  color: var(--ink-light);
+}
+
+.hud-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.collected-panel {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 12;
+  padding: 0.5rem 0.65rem;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 14px;
+  transform: rotate(0.6deg);
+  pointer-events: none;
+}
+
+.collected-items {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  max-width: min(220px, 40vw);
+}
+
+.collected-item {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.collected-item-icon {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: contrast(1.05) saturate(0.85) drop-shadow(0 1px 0 rgba(45, 42, 38, 0.2));
+  pointer-events: none;
+}
+
+.collected-item-emoji {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 1.25rem;
+  line-height: 1;
+  filter: grayscale(0.2) contrast(1.1);
+}
+
+.collected-tick {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  width: 18px;
+  height: 18px;
+  color: var(--ink);
+  pointer-events: none;
+  filter: drop-shadow(0 1px 0 rgba(45, 42, 38, 0.12));
+  transform: rotate(-8deg);
+}
+
+.btn-list {
+  padding: 0.35rem 0.85rem;
+  font-family: "Caveat", cursive;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--marker-blue);
+  cursor: pointer;
+  white-space: nowrap;
+  transform: rotate(1deg);
+  transition: transform 0.15s, background 0.15s;
+}
+
+.btn-list:hover,
+.btn-list--active {
+  background: #9ed0ff;
+  transform: rotate(0deg) scale(1.03);
+}
+
+.btn-end-game {
+  padding: 0.35rem 0.75rem;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--marker-pink);
+  cursor: pointer;
+  white-space: nowrap;
+  transform: rotate(-1.5deg);
+  transition: transform 0.15s, background 0.15s;
+}
+
+.btn-end-game:hover {
+  background: #ffb3c0;
+  transform: rotate(0deg) scale(1.03);
+}
+
+/* ── Noise meter ── */
+
+.noise-track {
+  position: relative;
+  height: 1.5rem;
+  background: rgba(255, 255, 255, 0.65);
+  overflow: hidden;
+  filter: url(#doodle-rough);
+}
+
+.noise-fill {
+  height: 100%;
+  border-radius: 2px 8px 4px 6px;
+  transition: background-color 0.3s, width 0.15s;
+  opacity: 0.92;
+}
+
+.noise-mark {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: rgba(45, 42, 38, 0.15);
+  transform: rotate(1deg);
+}
+
+/* ── Living room ── */
+
+.living-room {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  background: url("/living-room-bg.png") center / cover no-repeat;
+  border: 3px solid var(--sketch-line);
+  border-radius: 12px 28px 16px 24px / 20px 16px 28px 12px;
+  box-shadow: var(--doodle-shadow);
+  overflow: hidden;
+}
+
+.living-room .sketch-zone,
+.living-room .doodle-zone {
+  opacity: 0.25;
+  border-color: rgba(45, 42, 38, 0.35);
+}
+
+.living-room .zone-label {
+  opacity: 0.5;
+}
+
+.living-room .doodle-danger {
+  opacity: 0.45;
+}
+
+.sketch-zone,
+.doodle-zone {
+  position: absolute;
+  border: 2.5px dashed var(--ink);
+  border-radius: 18px 8px 22px 10px / 10px 20px 8px 18px;
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.zone-label {
+  position: absolute;
+  top: 4px;
+  left: 8px;
+  font-family: "Caveat", cursive;
+  font-size: 0.95rem;
+  font-weight: 600;
+  opacity: 0.7;
+  transform: rotate(-2deg);
+}
+
+.danger-zone,
+.doodle-danger {
+  position: absolute;
+  left: 30%;
+  top: 38%;
+  width: 40%;
+  height: 35%;
+  border: 2.5px dashed rgba(255, 107, 107, 0.45);
+  border-radius: 45% 55% 50% 50% / 55% 45% 55% 45%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 107, 107, 0.1) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  animation: doodle-pulse 3s ease-in-out infinite;
+}
+
+@keyframes doodle-pulse {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.02); }
+}
+
+/* ── Creature ── */
+
+.creature-wrapper {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  transform: translate(-50%, calc(-50% - 60px));
+  z-index: 6;
+  text-align: center;
+  pointer-events: none;
+}
+
+.sofa {
+  position: relative;
+  width: clamp(200px, 36vw, 300px);
+  padding: 0;
+  background: transparent;
+  overflow: visible;
+  transform: rotate(-0.5deg);
+}
+
+.sofa-label {
+  margin: 0.35rem 0 0;
+  font-size: 0.95rem;
+  opacity: 0.75;
+}
+
+.creature {
+  transition: transform 0.4s ease;
+}
+
+.creature-sprite {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1784 / 1160;
+  margin: 0 auto;
+}
+
+.creature-video-wrap {
+  position: absolute;
+  inset: 0;
+}
+
+.creature-video-source {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.creature-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+  user-select: none;
+  pointer-events: none;
+  filter:
+    drop-shadow(0 10px 18px rgba(0, 0, 0, 0.32))
+    drop-shadow(0 4px 8px rgba(0, 0, 0, 0.18));
+  image-rendering: auto;
+}
+
+.creature-video--sleep,
+.creature-video--wake {
+  position: absolute;
+  inset: 0;
+}
+
+.creature--stirring {
+  animation: creature-stir 1.8s ease-in-out infinite;
+}
+
+.creature--suspicious {
+  animation: creature-stir 0.9s ease-in-out infinite;
+}
+
+.creature--awake {
+  animation: shake 0.3s infinite;
+}
+
+@keyframes creature-stir {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  30% { transform: scale(1.02) rotate(-0.6deg); }
+  70% { transform: scale(1.02) rotate(0.6deg); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0) scale(1); }
+  25% { transform: translateX(-3px) scale(1.02); }
+  75% { transform: translateX(3px) scale(1.02); }
+}
+
+/* ── Draggable items ── */
+
+.draggable-item {
+  position: absolute;
+  transform: translate(-50%, -50%) rotate(-1deg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 0.4rem 0.55rem;
+  background: var(--marker-yellow);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+
+.draggable-item:nth-child(odd) {
+  transform: translate(-50%, -50%) rotate(1.5deg);
+}
+
+.draggable-item.item--soft {
+  background: var(--marker-green);
+}
+
+.draggable-item.item--crinkly {
+  background: var(--marker-orange);
+}
+
+.draggable-item.item--jingly {
+  background: var(--marker-pink);
+}
+
+.draggable-item.item--fragile {
+  background: var(--marker-blue);
+}
+
+.draggable-item.item--heavy {
+  background: #e8d4f0;
+}
+
+.draggable-item.dragging {
+  cursor: grabbing;
+  box-shadow: 5px 7px 0 rgba(45, 42, 38, 0.22);
+  background: #fff;
+  transform: translate(-50%, -50%) rotate(0deg) scale(1.05);
+  z-index: 50;
+}
+
+.draggable-item.danger {
+  box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.55), var(--doodle-shadow);
+  animation: doodle-wobble 0.5s ease-in-out infinite;
+}
+
+.draggable-item.rattle {
+  animation: rattle 0.1s linear;
+}
+
+.item-emoji {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.item-label {
+  font-family: "Caveat", cursive;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.draggable-item.draggable-item--image,
+.draggable-item.draggable-item--image.item--soft,
+.draggable-item.draggable-item--image.item--crinkly,
+.draggable-item.draggable-item--image.item--jingly,
+.draggable-item.draggable-item--image.item--fragile,
+.draggable-item.draggable-item--image.item--heavy {
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  filter: none;
+}
+
+.draggable-item.draggable-item--image.sketch-border {
+  border: none;
+  box-shadow: none;
+}
+
+.draggable-item.draggable-item--image.dragging {
+  background: transparent;
+  box-shadow: none;
+  transform: translate(-50%, -50%) rotate(0deg) scale(1.08);
+}
+
+.draggable-item.draggable-item--image.danger {
+  box-shadow: none;
+  animation: none;
+}
+
+.draggable-item.draggable-item--image:focus,
+.draggable-item.draggable-item--image:focus-visible {
+  outline: none;
+}
+
+.item-image {
+  display: block;
+  width: clamp(56px, 8vw, 88px);
+  height: auto;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+.item-image--wide {
+  width: clamp(40px, 6vw, 60px);
+}
+
+.item-image--laptop {
+  width: clamp(80px, 12vw, 120px);
+}
+
+.item-image--hoodie {
+  width: clamp(112px, 16vw, 176px);
+}
+
+.item-image--coins {
+  width: clamp(64px, 9vw, 96px);
+}
+
+.item-image--bell {
+  width: clamp(48px, 7vw, 72px);
+}
+
+.item-image--chips {
+  width: clamp(56px, 8vw, 84px);
+}
+
+.item-image--cat {
+  width: clamp(72px, 10vw, 108px);
+}
+
+@keyframes rattle {
+  0%, 100% { transform: translate(-50%, -50%) rotate(-1deg); }
+  25% { transform: translate(-50%, -50%) rotate(-5deg); }
+  75% { transform: translate(-50%, -50%) rotate(5deg); }
+}
+
+@keyframes doodle-wobble {
+  0%, 100% { transform: translate(-50%, -50%) rotate(-1deg); }
+  50% { transform: translate(-50%, -50%) rotate(1deg); }
+}
+
+/* ── Sort box ── */
+
+.sort-box {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) rotate(-0.5deg);
+  width: clamp(280px, 52vw, 420px);
+  padding: 0;
+  background: transparent;
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sort-box-visual {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.sort-box-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  object-position: bottom center;
+  user-select: none;
+  pointer-events: none;
+  transition: filter 0.15s;
+}
+
+.sort-box--reject .sort-box-image {
+  filter: saturate(0.85) brightness(0.95);
+}
+
+.sort-box--success .sort-box-image {
+  filter: saturate(1.05) brightness(1.03);
+}
+
+.sort-box-feedback {
+  position: absolute;
+  left: 50%;
+  top: 12%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 50%;
+  box-shadow: 0 4px 14px rgba(45, 42, 38, 0.22);
+  pointer-events: none;
+  animation: feedback-pop 1s ease forwards;
+}
+
+.sort-box-feedback--reject {
+  border: 2.5px solid var(--accent);
+}
+
+.sort-box-feedback--success {
+  border: 2.5px solid #3d9a6a;
+}
+
+.doodle-reject-x,
+.doodle-success-mark {
+  width: 48px;
+  height: 48px;
+  display: block;
+}
+
+.doodle-reject-x-bg {
+  fill: #fffef8;
+  stroke: var(--accent);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+}
+
+.doodle-reject-x-mark {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.doodle-success-mark-bg {
+  fill: #fffef8;
+  stroke: #3d9a6a;
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+}
+
+.doodle-success-mark-check {
+  fill: none;
+  stroke: #3d9a6a;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@keyframes feedback-pop {
+  0% { opacity: 0; transform: translateX(-50%) scale(0.6); }
+  15% { opacity: 1; transform: translateX(-50%) scale(1.08); }
+  25% { transform: translateX(-50%) scale(1); }
+  70% { opacity: 1; transform: translateX(-50%) scale(1); }
+  100% { opacity: 0; transform: translateX(-50%) scale(0.92); }
+}
+
+.instruction-item-image {
+  width: 2rem;
+  height: 2rem;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+/* ── Start screen ── */
+
+.start-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: clamp(1.5rem, 5vw, 3rem);
+  padding-bottom: clamp(4rem, 14vh, 8rem);
+  background:
+    linear-gradient(
+      rgba(20, 16, 28, 0.2),
+      rgba(20, 16, 28, 0.2)
+    ),
+    url("/intro-bg.png") center / cover no-repeat;
+}
+
+.start-screen-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(100%, 36rem);
+  text-align: center;
+  padding: 0;
+  transform: rotate(-0.5deg) translateY(-1.5rem);
+}
+
+.start-screen .game-title-lg {
+  color: #fff;
+  font-size: clamp(4.5rem, 14vw, 7rem);
+  margin-bottom: 0.75rem;
+}
+
+.start-screen-pitch {
+  margin: 0 0 1.5rem;
+  max-width: 28rem;
+  color: #fff;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: clamp(0.8rem, 2vw, 0.95rem);
+  font-weight: 300;
+  line-height: 1.45;
+}
+
+.btn-primary--start {
+  padding: 1.1rem 3.25rem;
+  font-size: clamp(3rem, 8vw, 4rem);
+}
+
+.game-title-lg {
+  margin: 0 0 0.75rem;
+  font-size: clamp(2.5rem, 8vw, 4rem);
+  line-height: 1;
+  transform: rotate(-1deg);
+}
+
+.doodle-title--celebrate::before {
+  content: "★ ";
+  color: var(--marker-orange);
+}
+
+.doodle-title--celebrate::after {
+  content: " ★";
+  color: var(--marker-orange);
+}
+
+.pitch {
+  margin: 0 0 1.75rem;
+  max-width: 28rem;
+  font-size: 1.1rem;
+  line-height: 1.55;
+  color: var(--ink-light);
+}
+
+/* ── Overlays / end screen ── */
+
+.overlay-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.doodle-overlay {
+  background: rgba(255, 254, 248, 0.82);
+  backdrop-filter: blur(2px);
+}
+
+.overlay-card,
+.doodle-card {
+  max-width: 28rem;
+  padding: 1.75rem 2rem;
+  background: var(--paper);
+  text-align: center;
+  transform: rotate(-0.5deg);
+  background-image:
+    repeating-linear-gradient(
+      transparent,
+      transparent 27px,
+      var(--paper-line) 27px,
+      var(--paper-line) 28px
+    );
+}
+
+.btn-primary,
+.btn-secondary {
+  display: inline-block;
+  padding: 0.65rem 1.35rem;
+  font-family: "Caveat", cursive;
+  font-size: 1.25rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+
+.btn-primary {
+  background: var(--marker-green);
+  color: var(--ink);
+  transform: rotate(-1deg);
+}
+
+.btn-primary:hover {
+  transform: rotate(0deg) translateY(-2px);
+  box-shadow: 4px 5px 0 rgba(45, 42, 38, 0.2);
+}
+
+.btn-primary.btn-primary--start {
+  background: #d4c4ff;
+  color: var(--ink);
+}
+
+.btn-primary.btn-primary--start:hover {
+  background: #c4b0ff;
+  color: var(--ink);
+}
+
+.btn-secondary {
+  background: var(--marker-yellow);
+  color: var(--ink);
+  transform: rotate(1deg);
+}
+
+.btn-secondary:hover {
+  transform: rotate(0deg) translateY(-2px);
+}
+
+.end-title {
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
+}
+
+.end-title--win {
+  color: #3d9a6a;
+}
+
+.end-title--lose {
+  color: var(--accent);
+}
+
+.end-message {
+  margin: 0 0 1.25rem;
+  font-size: 1.05rem;
+  line-height: 1.5;
+  color: var(--ink-light);
+}
+
+.end-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  justify-content: center;
+}
+
+/* ── Instruction sheet ── */
+
+.instruction-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  background: rgba(255, 254, 248, 0.55);
+  backdrop-filter: blur(1px);
+}
+
+.instruction-sheet {
+  position: relative;
+  width: min(100%, 22rem);
+  max-height: min(85vh, 520px);
+  overflow-y: auto;
+  padding: 1.25rem 1.5rem 1.5rem;
+  background: var(--paper);
+  background-image:
+    repeating-linear-gradient(
+      transparent,
+      transparent 27px,
+      var(--paper-line) 27px,
+      var(--paper-line) 28px
+    );
+  transform-origin: center center;
+  animation: sheet-roll 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes sheet-roll {
+  0% {
+    transform: translateY(-12%) rotate(-3deg) scale(0.92);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(2%) rotate(0.5deg) scale(1.02);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0) rotate(-0.5deg) scale(1);
+    opacity: 1;
+  }
+}
+
+.instruction-title {
+  margin: 0 0 0.15rem;
+  font-size: 2rem;
+  text-align: center;
+}
+
+.instruction-subtitle {
+  margin: 0 0 1rem;
+  text-align: center;
+  font-size: 0.95rem;
+  color: var(--ink-light);
+}
+
+.instruction-list {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.instruction-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.6rem;
+  background: #f2f2f2;
+  border-radius: 10px;
+}
+
+.instruction-item--done {
+  opacity: 0.55;
+  text-decoration: line-through;
+}
+
+.instruction-emoji {
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.instruction-label {
+  font-family: "Caveat", cursive;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.instruction-hint {
+  margin: 0 0 1rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--ink-light);
+}
+
+.instruction-close {
+  display: block;
+  width: 100%;
+}
+
+.tips {
+  text-align: left;
+  margin: 0 0 1.25rem;
+  padding-left: 1.25rem;
+  font-size: 0.95rem;
+  color: var(--ink-light);
+}
+
+.tips li {
+  margin-bottom: 0.35rem;
+}
