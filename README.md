@@ -1,74 +1,78 @@
-# AI Hackathon Game
+# Keep It Quiet
 
-A collaborative hackathon project by **Vaida** and **Ina** — building an AI-powered game to learn, experiment, and explore what it's like to code together.
+A high-tension, stealth-based puzzle game where you sort scattered household items without waking the sleeping creature on the sofa.
 
 ## About
 
-This repository is our hackathon playground. Vaida and Ina are teaming up to create a game with AI — not just to ship a demo, but to learn along the way. The main goal is to try collaborative coding: comparing ideas, pairing on problems, and seeing how two approaches come together in one project. It's a hands-on way to practice building together and discover what works when you co-create in real time.
-
-## Features
-
-- Feature 1
-- Feature 2
-- Feature 3
+Every drag generates noise. Move too fast, get too close to the sofa, or handle jingly items carelessly — and the noise meter fills. Wake the creature, and you lose.
 
 ## Getting Started
 
 ### Prerequisites
 
-- List required tools, runtimes, or accounts (e.g. Node.js, Python, API keys)
+- Node.js 18+
+- npm
 
 ### Installation
 
 ```bash
-# Clone the repository
 git clone https://github.com/vaidaburbe-design/AI-hackathon-game.git
 cd AI-hackathon-game
-
-# Install dependencies
-# npm install
-# pip install -r requirements.txt
+npm install
 ```
 
-### Running the Project
+### Development
 
 ```bash
-# Add your start command here
-# npm run dev
-# python main.py
+npm run dev
 ```
 
-## Usage
+Open [http://localhost:5173](http://localhost:5173).
 
-Explain how to use the project once it is running.
+### Production Build
+
+```bash
+npm run build
+npm run preview
+```
+
+## Deploy (Vercel)
+
+The project uses Vite. Vercel auto-detects the framework from `package.json`.
+
+- Build command: `npm run build`
+- Output directory: `dist`
+- `vercel.json` sets `frame-ancestors *` for iframe embedding
+
+## How to Play
+
+1. Click **Start Round 1**
+2. Drag items into the **Sort Box** at the bottom
+3. Move slowly — especially near the sofa
+4. Wait quietly and the creature settles back down
+5. Complete all 3 rounds to win
+
+## Tech Stack
+
+- React 19 + TypeScript
+- Vite
+- Tailwind CSS 4
+- Web Audio API (procedural snore + wake sting)
 
 ## Project Structure
 
 ```
-.
-├── README.md
-└── ...
+src/
+├── components/     # UI (Creature, LivingRoom, DraggableItem, etc.)
+├── config/         # Game tuning constants
+├── data/           # Items and round definitions
+├── systems/        # Noise and monster logic (pure functions)
+├── state/          # GameContext + reducer
+├── hooks/          # Game loop, drag noise
+├── audio/          # Web Audio manager
+└── embed/          # Iframe audio-unlock utilities
 ```
-
-## Tech Stack
-
-- Tool / framework 1
-- Tool / framework 2
-
-## Contributing
-
-1. Create a branch from `main`
-2. Make your changes
-3. Open a pull request
-
-## License
-
-Add your license here (e.g. MIT).
 
 ## Authors
 
-- Your Name — [@your-handle](https://github.com/your-handle)
-
-## Acknowledgments
-
-- Credit libraries, teammates, or resources that helped.
+- Vaida & Ina — AI Hackathon Game
