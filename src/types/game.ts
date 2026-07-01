@@ -2,6 +2,7 @@ export type MonsterStage = "deepSleep" | "stirring" | "suspicious" | "awake";
 export type GameStatus = "idle" | "playing" | "won" | "lost";
 export type ItemType = "soft" | "crinkly" | "jingly" | "fragile" | "heavy";
 export type ItemTier = "easy" | "medium" | "hard";
+export type ItemNoiseLevel = 1 | 2 | 3 | 4 | 5;
 export type RoomZone = "coffeeTable" | "bookshelf" | "backShelf" | "floor";
 
 export interface ItemDefinition {
@@ -9,6 +10,7 @@ export interface ItemDefinition {
   label: string;
   tier: ItemTier;
   type: ItemType;
+  noiseLevel: ItemNoiseLevel;
   baseNoise: number;
   zone: RoomZone;
   position: { x: number; y: number };
