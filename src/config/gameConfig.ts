@@ -10,6 +10,7 @@ export const GAME_CONFIG = {
   speedNoiseThreshold: 0.4,
   speedMaxMultiplier: 2.5,
   bellPickupNoisePenalty: 55,
+  catPickupNoisePenalty: 28,
   rejectNoisePenalty: 18,
   debugNoiseAmount: 8,
   totalRounds: 3,
