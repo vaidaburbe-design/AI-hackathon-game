@@ -3,8 +3,11 @@ import type { GameStatus, MonsterStage } from "../types/game";
 const BELL_PICKUP_SRC = "/sounds/bell_sound.wav";
 const BUTTON_CLICK_SRC = "/sounds/button-click.mp3";
 const CAT_PICKUP_SRC = "/sounds/cat_sound.mp3";
+const COINS_PICKUP_SRC = "/sounds/coins_drop.mp3";
 const INTRO_SONG_SRC = "/sounds/intro_song.mp3";
+const KEY_PICKUP_SRC = "/sounds/key_rattle.wav";
 const MONSTER_ROAR_SRC = "/sounds/monster_roar.mp3";
+const PACKAGE_PICKUP_SRC = "/sounds/package_sound.mp3";
 const SNORING_SRC = "/sounds/sleeping_breathing.mp3";
 const INTRO_START_TIME = 22;
 
@@ -12,8 +15,11 @@ let audioCtx: AudioContext | null = null;
 let bellPickupAudio: HTMLAudioElement | null = null;
 let buttonClickAudio: HTMLAudioElement | null = null;
 let catPickupAudio: HTMLAudioElement | null = null;
+let coinsPickupAudio: HTMLAudioElement | null = null;
 let introAudio: HTMLAudioElement | null = null;
+let keyPickupAudio: HTMLAudioElement | null = null;
 let monsterRoarAudio: HTMLAudioElement | null = null;
+let packagePickupAudio: HTMLAudioElement | null = null;
 let snoreAudio: HTMLAudioElement | null = null;
 let introShouldPlay = false;
 let snoreShouldPlay = false;
@@ -66,6 +72,30 @@ function getCatPickupAudio(): HTMLAudioElement {
   return catPickupAudio;
 }
 
+function getCoinsPickupAudio(): HTMLAudioElement {
+  if (!coinsPickupAudio) {
+    coinsPickupAudio = new Audio(COINS_PICKUP_SRC);
+    coinsPickupAudio.preload = "auto";
+  }
+  return coinsPickupAudio;
+}
+
+function getKeyPickupAudio(): HTMLAudioElement {
+  if (!keyPickupAudio) {
+    keyPickupAudio = new Audio(KEY_PICKUP_SRC);
+    keyPickupAudio.preload = "auto";
+  }
+  return keyPickupAudio;
+}
+
+function getPackagePickupAudio(): HTMLAudioElement {
+  if (!packagePickupAudio) {
+    packagePickupAudio = new Audio(PACKAGE_PICKUP_SRC);
+    packagePickupAudio.preload = "auto";
+  }
+  return packagePickupAudio;
+}
+
 export function playButtonClick() {
   if (audioMuted) return;
   unlockAudioContext();
@@ -86,6 +116,30 @@ export function playCatPickupSound() {
   if (audioMuted) return;
   unlockAudioContext();
   const audio = getCatPickupAudio();
+  audio.currentTime = 0;
+  void audio.play().catch(() => {});
+}
+
+export function playCoinsPickupSound() {
+  if (audioMuted) return;
+  unlockAudioContext();
+  const audio = getCoinsPickupAudio();
+  audio.currentTime = 0;
+  void audio.play().catch(() => {});
+}
+
+export function playKeyPickupSound() {
+  if (audioMuted) return;
+  unlockAudioContext();
+  const audio = getKeyPickupAudio();
+  audio.currentTime = 0;
+  void audio.play().catch(() => {});
+}
+
+export function playPackagePickupSound() {
+  if (audioMuted) return;
+  unlockAudioContext();
+  const audio = getPackagePickupAudio();
   audio.currentTime = 0;
   void audio.play().catch(() => {});
 }
@@ -143,7 +197,10 @@ export function initButtonClickSound() {
 export function preloadGameAudio() {
   getBellPickupAudio().load();
   getCatPickupAudio().load();
+  getCoinsPickupAudio().load();
   getIntroAudio().load();
+  getKeyPickupAudio().load();
+  getPackagePickupAudio().load();
   getSnoreAudio().load();
   getMonsterRoarAudio().load();
 }
@@ -306,7 +363,7 @@ export function syncGameAudio(status: GameStatus, stage: MonsterStage) {
 export function setAudioMuted(muted: boolean) {
   audioMuted = muted;
 
-  [bellPickupAudio, buttonClickAudio, catPickupAudio, introAudio, monsterRoarAudio, snoreAudio].forEach((audio) => {
+  [bellPickupAudio, buttonClickAudio, catPickupAudio, coinsPickupAudio, introAudio, keyPickupAudio, monsterRoarAudio, packagePickupAudio, snoreAudio].forEach((audio) => {
     if (!audio) return;
     audio.muted = muted;
     if (muted) audio.pause();

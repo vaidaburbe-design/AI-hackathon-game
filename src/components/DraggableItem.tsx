@@ -3,7 +3,13 @@ import { useGame } from "../state/GameContext";
 import { useDragNoise } from "../hooks/useDragNoise";
 import { getProximityMultiplier } from "../systems/noise";
 import { getItemImage } from "../data/items";
-import { playBellPickupSound, playCatPickupSound } from "../audio/audioManager";
+import {
+  playBellPickupSound,
+  playCatPickupSound,
+  playCoinsPickupSound,
+  playKeyPickupSound,
+  playPackagePickupSound,
+} from "../audio/audioManager";
 import { GAME_CONFIG } from "../config/gameConfig";
 import type { ItemInstance } from "../types/game";
 
@@ -57,6 +63,9 @@ export function DraggableItem({
     e.preventDefault();
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
     if (item.id === "cat") playCatPickupSound();
+    if (item.id === "chips") playPackagePickupSound();
+    if (item.id === "coins") playCoinsPickupSound();
+    if (item.id === "keys") playKeyPickupSound();
     if (item.id === "bell") {
       playBellPickupSound();
       dispatch({ type: "ADD_NOISE", amount: GAME_CONFIG.bellPickupNoisePenalty });
