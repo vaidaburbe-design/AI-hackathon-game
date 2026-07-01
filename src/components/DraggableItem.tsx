@@ -3,6 +3,8 @@ import { useGame } from "../state/GameContext";
 import { useDragNoise } from "../hooks/useDragNoise";
 import { getProximityMultiplier } from "../systems/noise";
 import { getItemImage } from "../data/items";
+import { playBellPickupSound, playCatPickupSound } from "../audio/audioManager";
+import { GAME_CONFIG } from "../config/gameConfig";
 import type { ItemInstance } from "../types/game";
 
 interface DraggableItemProps {
@@ -54,6 +56,11 @@ export function DraggableItem({
     if (item.sorted) return;
     e.preventDefault();
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    if (item.id === "cat") playCatPickupSound();
+    if (item.id === "bell") {
+      playBellPickupSound();
+      dispatch({ type: "ADD_NOISE", amount: GAME_CONFIG.bellPickupNoisePenalty });
+    }
     const pos = getPercentPos(e.clientX, e.clientY);
     dragOffset.current = {
       x: e.clientX - (roomRef.current?.getBoundingClientRect().left ?? 0),
@@ -104,7 +111,7 @@ export function DraggableItem({
   return (
     <button
       type="button"
-      className={`draggable-item item--${item.type} ${imageSrc ? "draggable-item--image" : "sketch-border"} ${item.dragging ? "dragging" : ""} ${rattle ? "rattle" : ""} ${danger ? "danger" : ""}`}
+      className={`draggable-item item--${item.type} ${imageSrc ? "draggable-item--image" : "sketch-border"} ${item.id === "cat" ? "draggable-item--cat" : ""} ${item.dragging ? "dragging" : ""} ${rattle ? "rattle" : ""} ${danger ? "danger" : ""}`}
       style={{
         left: `${x}%`,
         top: `${y}%`,

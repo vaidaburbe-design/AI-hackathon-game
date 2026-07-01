@@ -9,6 +9,8 @@ export const GAME_CONFIG = {
   proximityMaxMultiplier: 2.8,
   speedNoiseThreshold: 0.4,
   speedMaxMultiplier: 2.5,
+  bellPickupNoisePenalty: 55,
+  rejectNoisePenalty: 18,
   debugNoiseAmount: 8,
   totalRounds: 3,
 } as const;

@@ -181,7 +181,7 @@ export const ITEM_CATALOG: Record<string, ItemDefinition> = {
     position: { x: 88, y: 48 },
     handlingSpeed: 0.9,
     emoji: "🐱",
-    image: "/items/cat.png",
+    image: "/items/cat-solid.png",
     sortable: false,
   },
 };
