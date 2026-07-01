@@ -9,7 +9,7 @@ const STAGE_ORDER: MonsterStage[] = [
 ];
 
 export function noiseToStage(noise: number): MonsterStage {
-  if (noise >= MONSTER_THRESHOLDS.awake) return "awake";
+  if (noise >= MONSTER_THRESHOLDS.awake) return "suspicious";
   if (noise >= MONSTER_THRESHOLDS.suspicious) return "suspicious";
   if (noise >= MONSTER_THRESHOLDS.stirring) return "stirring";
   return "deepSleep";
