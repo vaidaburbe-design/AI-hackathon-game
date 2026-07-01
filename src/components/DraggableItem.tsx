@@ -62,7 +62,10 @@ export function DraggableItem({
     if (item.sorted) return;
     e.preventDefault();
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
-    if (item.id === "cat") playCatPickupSound();
+    if (item.id === "cat") {
+      playCatPickupSound();
+      dispatch({ type: "ADD_NOISE", amount: GAME_CONFIG.catPickupNoisePenalty });
+    }
     if (item.id === "chips") playPackagePickupSound();
     if (item.id === "coins") playCoinsPickupSound();
     if (item.id === "keys") playKeyPickupSound();
