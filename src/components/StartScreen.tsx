@@ -2,12 +2,9 @@ import { useState } from "react";
 import {
   preloadGameAudio,
   resumeGameplayAudio,
-  stopIntroMusic,
   unlockAudioContext,
 } from "../audio/audioManager";
 import { preloadGameAssets } from "../assets/preloadGameAssets";
-
-const MIN_LOADING_MS = 2000;
 
 interface StartScreenProps {
   onStart: () => void;
@@ -21,13 +18,9 @@ export function StartScreen({ onStart }: StartScreenProps) {
     setLoading(true);
     unlockAudioContext();
     preloadGameAudio();
-    await Promise.all([
-      preloadGameAssets(),
-      new Promise((resolve) => window.setTimeout(resolve, MIN_LOADING_MS)),
-    ]);
-    stopIntroMusic();
-    onStart();
     resumeGameplayAudio("deepSleep");
+    await preloadGameAssets();
+    onStart();
   };
 
   return (
