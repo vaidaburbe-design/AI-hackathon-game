@@ -859,10 +859,15 @@ body {
 }
 
 .doodle-reject-x,
-.doodle-success-mark {
+.doodle-success-mark,
+.sort-box-success-icon {
   width: 48px;
   height: 48px;
   display: block;
+}
+
+.sort-box-success-icon {
+  object-fit: contain;
 }
 
 .doodle-reject-x-bg {
@@ -919,7 +924,7 @@ body {
   align-items: flex-end;
   justify-content: center;
   padding: clamp(1.5rem, 5vw, 3rem);
-  padding-bottom: clamp(4rem, 14vh, 8rem);
+  padding-bottom: clamp(2.5rem, 9vh, 5.5rem);
   background:
     linear-gradient(
       rgba(20, 16, 28, 0.2),
@@ -937,7 +942,7 @@ body {
   width: min(100%, 36rem);
   text-align: center;
   padding: 0;
-  transform: rotate(-0.5deg) translateY(-1.5rem);
+  transform: rotate(-0.5deg) translateY(0.75rem);
 }
 
 .start-screen .game-title-lg {
@@ -954,6 +959,13 @@ body {
   font-size: clamp(30px, 3vw, 40px);
   font-weight: 700;
   line-height: 1.45;
+}
+
+@media (min-width: 48rem) {
+  .start-screen-pitch {
+    max-width: none;
+    white-space: nowrap;
+  }
 }
 
 .btn-primary--start {
@@ -1103,7 +1115,7 @@ body {
 }
 
 .btn-primary.btn-primary--start:hover {
-  background: #c4b0ff;
+  background: #3ab876;
   color: var(--ink);
 }
 
@@ -1245,7 +1257,7 @@ body {
 }
 
 .end-title--lose {
-  color: var(--accent);
+  color: var(--ink);
 }
 
 .end-message {

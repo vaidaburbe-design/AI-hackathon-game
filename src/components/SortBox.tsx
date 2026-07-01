@@ -1,6 +1,5 @@
 import { forwardRef } from "react";
 import { DoodleRejectX } from "./DoodleRejectX";
-import { DoodleSuccessMark } from "./DoodleSuccessMark";
 
 export type SortBoxFeedback = "reject" | "success" | null;
 
@@ -39,7 +38,12 @@ export const SortBox = forwardRef<HTMLDivElement, SortBoxProps>(
               aria-label="Fits"
               aria-live="polite"
             >
-              <DoodleSuccessMark />
+              <img
+                src="/items/sort-success-check.png"
+                alt=""
+                className="sort-box-success-icon"
+                draggable={false}
+              />
             </div>
           )}
         </div>

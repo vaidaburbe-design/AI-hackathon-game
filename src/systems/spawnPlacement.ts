@@ -1,7 +1,10 @@
-/** Percent-based zones where draggable items must never spawn (see LivingRoom layout). */
+/**
+ * Percent-based zones where item centers must never spawn.
+ * Sized generously so large item sprites do not overlap the creature or sort box.
+ */
 export const SPAWN_FORBIDDEN_ZONES = [
-  { id: "monster", xMin: 28, xMax: 72, yMin: 28, yMax: 62 },
-  { id: "sortBox", xMin: 18, xMax: 82, yMin: 64, yMax: 98 },
+  { id: "monster", xMin: 22, xMax: 78, yMin: 14, yMax: 54 },
+  { id: "sortBox", xMin: 14, xMax: 86, yMin: 46, yMax: 98 },
 ] as const;
 
 const MIN_ITEM_SPACING = 11;
@@ -134,5 +137,30 @@ export function resolveSpawnPosition(
     }
   }
 
-  return clamped;
+  for (const slot of buildCandidateSlots()) {
+    if (!isInForbiddenSpawnZone(slot.x, slot.y)) {
+      return slot;
+    }
+  }
+
+  return { x: 8, y: 10 };
+}
+
+/** Pick `count` spawn positions that never overlap the monster, sort box, or each other. */
+export function pickSpawnPositions(count: number): { x: number; y: number }[] {
+  if (count <= 0) return [];
+
+  const scattered = scatterSpawnPositions(count);
+  const occupied: { x: number; y: number }[] = [];
+  const safeSlots = buildCandidateSlots();
+
+  return Array.from({ length: count }, (_, index) => {
+    const preferred =
+      scattered[index] ??
+      safeSlots[index % safeSlots.length] ??
+      { x: 8 + (index % 4) * 20, y: 10 + Math.floor(index / 4) * 12 };
+    const position = resolveSpawnPosition(preferred, occupied);
+    occupied.push(position);
+    return position;
+  });
 }

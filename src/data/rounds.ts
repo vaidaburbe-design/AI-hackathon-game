@@ -1,4 +1,4 @@
-import { scatterSpawnPositions } from "../systems/spawnPlacement";
+import { pickSpawnPositions } from "../systems/spawnPlacement";
 import { ITEM_CATALOG, getItem } from "./items";
 import type { ItemInstance, ItemNoiseLevel } from "../types/game";
 
@@ -85,14 +85,14 @@ export function createRoundItems(
   const excludedDecoys = new Set([...excludeDecoyIds, ...targetIds]);
   const decoyIds = pickItemIdsForGroups(round.decoyGroups, excludedDecoys);
   const allIds = [...targetIds, ...decoyIds];
-  const positions = scatterSpawnPositions(allIds.length);
+  const positions = pickSpawnPositions(allIds.length);
 
   const sortableItems = targetIds.map((id, index) => {
     const def = getItem(id);
 
     return {
       ...def,
-      position: positions[index] ?? def.position,
+      position: positions[index],
       sortable: true,
       sorted: false,
       dragging: false,
@@ -105,7 +105,7 @@ export function createRoundItems(
 
     return {
       ...def,
-      position: positions[positionIndex] ?? def.position,
+      position: positions[positionIndex],
       sortable: false,
       sorted: false,
       dragging: false,

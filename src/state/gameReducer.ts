@@ -95,6 +95,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         return {
           ...state,
           timeRemainingMs: 0,
+          noise: GAME_CONFIG.maxNoise,
           monsterStage: "awake",
           status: "lost",
           loseReason: "time",

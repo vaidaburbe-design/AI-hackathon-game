@@ -4,6 +4,7 @@ const IMAGE_SOURCES = [
   "/living-room.jpg",
   "/intro-bg.png",
   "/items/sort-box.png",
+  "/items/sort-success-check.png",
   "/creature/happy-win.png",
   "/creature/sad-lose.png",
   "/creature/time-up.png",
