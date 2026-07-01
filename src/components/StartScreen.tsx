@@ -42,8 +42,23 @@ export function StartScreen({ onStart }: StartScreenProps) {
           className="btn-primary btn-primary--start sketch-border"
           onClick={handleStart}
           disabled={loading}
+          aria-busy={loading}
+          aria-label={loading ? "Loading" : "Play"}
         >
-          {loading ? "LOADING" : "PLAY"}
+          <span className="btn-primary--start-inner">
+            <span
+              className={`btn-primary--start-label${loading ? " is-hidden" : ""}`}
+              aria-hidden={loading}
+            >
+              PLAY
+            </span>
+            <span
+              className={`btn-primary--start-spinner${loading ? " is-visible" : ""}`}
+              aria-hidden={!loading}
+            >
+              <span className="btn-spinner" />
+            </span>
+          </span>
         </button>
       </div>
     </div>

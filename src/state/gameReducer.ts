@@ -1,4 +1,4 @@
-import { GAME_CONFIG, MONSTER_THRESHOLDS } from "../config/gameConfig";
+import { GAME_CONFIG, MONSTER_THRESHOLDS, getRoundTimeLimitMs } from "../config/gameConfig";
 import { createRoundItems } from "../data/rounds";
 import { clampNoise, decayNoise } from "../systems/noise";
 import { noiseToStage, settleStage } from "../systems/monster";
@@ -17,6 +17,8 @@ const initialState: GameState = {
   highNoiseSince: null,
   isDragging: false,
   decoysByRound: {},
+  timeRemainingMs: 0,
+  loseReason: null,
 };
 
 export function getInitialState(): GameState {
@@ -52,6 +54,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           ...state.decoysByRound,
           [action.round]: getDecoyIds(items),
         },
+        timeRemainingMs: getRoundTimeLimitMs(action.round),
+        loseReason: null,
       };
     }
 
@@ -67,6 +71,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           noise,
           monsterStage: "awake",
           status: "lost",
+          loseReason: "noise",
           highNoiseSince,
           isDragging: false,
           items: state.items.map((i) => ({ ...i, dragging: false })),
@@ -84,6 +89,21 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     case "TICK": {
       if (state.status !== "playing") return state;
       const now = performance.now();
+      const timeRemainingMs = Math.max(0, state.timeRemainingMs - action.deltaMs);
+
+      if (timeRemainingMs <= 0) {
+        return {
+          ...state,
+          timeRemainingMs: 0,
+          monsterStage: "awake",
+          status: "lost",
+          loseReason: "time",
+          highNoiseSince: null,
+          isDragging: false,
+          items: state.items.map((i) => ({ ...i, dragging: false })),
+        };
+      }
+
       let noise = state.noise;
       if (!state.isDragging) {
         noise = decayNoise(noise, action.deltaMs);
@@ -109,6 +129,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           noise,
           monsterStage: "awake",
           status: "lost",
+          loseReason: "noise",
           snorePhase,
           highNoiseSince,
           isDragging: false,
@@ -123,6 +144,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         lowNoiseSince,
         highNoiseSince,
         snorePhase,
+        timeRemainingMs,
       };
     }
 
@@ -178,6 +200,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         ...state,
         status: "lost",
         monsterStage: "awake",
+        loseReason: "noise",
         highNoiseSince: null,
         isDragging: false,
         items: state.items.map((i) => ({ ...i, dragging: false })),
@@ -203,6 +226,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         lowNoiseSince: null,
         highNoiseSince: null,
         isDragging: false,
+        timeRemainingMs: getRoundTimeLimitMs(state.round),
+        loseReason: null,
       };
     }
 
@@ -289,6 +314,8 @@ function startRoundState(round: number) {
     sortedCount: 0,
     totalItems: countSortable(items),
     decoysByRound,
+    timeRemainingMs: getRoundTimeLimitMs(round),
+    loseReason: null,
   };
 }
 
@@ -312,5 +339,7 @@ export function advanceRound(state: GameState): GameState | null {
     lowNoiseSince: null,
     highNoiseSince: null,
     isDragging: false,
+    timeRemainingMs: getRoundTimeLimitMs(nextRound),
+    loseReason: null,
   };
 }

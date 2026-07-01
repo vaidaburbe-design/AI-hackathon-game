@@ -1,5 +1,6 @@
 export type MonsterStage = "deepSleep" | "stirring" | "suspicious" | "awake";
 export type GameStatus = "idle" | "playing" | "won" | "lost";
+export type LoseReason = "noise" | "time";
 export type ItemType = "soft" | "crinkly" | "jingly" | "fragile" | "heavy";
 export type ItemTier = "easy" | "medium" | "hard";
 export type ItemNoiseLevel = 1 | 2 | 3 | 4 | 5;
@@ -40,6 +41,8 @@ export interface GameState {
   highNoiseSince: number | null;
   isDragging: boolean;
   decoysByRound: Partial<Record<number, string[]>>;
+  timeRemainingMs: number;
+  loseReason: LoseReason | null;
 }
 
 export type GameAction =

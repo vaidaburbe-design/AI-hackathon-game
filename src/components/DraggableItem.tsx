@@ -69,7 +69,10 @@ export function DraggableItem({
     e.preventDefault();
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
     stopItemPickupSounds();
-    if (item.id === "alarm-clock") playAlarmClockPickupSound();
+    if (item.id === "alarm-clock") {
+      playAlarmClockPickupSound();
+      dispatch({ type: "ADD_NOISE", amount: GAME_CONFIG.alarmClockPickupNoisePenalty });
+    }
     if (item.id === "cat") {
       playCatPickupSound();
       dispatch({ type: "ADD_NOISE", amount: GAME_CONFIG.catPickupNoisePenalty });

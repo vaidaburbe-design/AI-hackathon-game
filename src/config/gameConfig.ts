@@ -51,11 +51,23 @@ export const GAME_CONFIG = {
   speedNoiseThreshold: 0.4,
   speedMaxMultiplier: 2.5,
   bellPickupNoisePenalty: 55,
+  alarmClockPickupNoisePenalty: 65,
+  alarmClockRejectNoisePenalty: 45,
   catPickupNoisePenalty: 28,
   rejectNoisePenalty: 18,
   debugNoiseAmount: 8,
   totalRounds: 3,
+  roundTimeMs: {
+    1: 45_000,
+    2: 35_000,
+    3: 25_000,
+  },
 } as const;
+
+export function getRoundTimeLimitMs(round: number): number {
+  const limits = GAME_CONFIG.roundTimeMs;
+  return limits[round as keyof typeof limits] ?? limits[3];
+}
 
 export const MONSTER_THRESHOLDS = {
   deepSleep: 0,

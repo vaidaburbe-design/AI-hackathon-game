@@ -4,6 +4,10 @@ const IMAGE_SOURCES = [
   "/living-room.jpg",
   "/intro-bg.png",
   "/items/sort-box.png",
+  "/creature/happy-win.png",
+  "/creature/sad-lose.png",
+  "/creature/time-up.png",
+  "/creature/round-win-check.png",
   ...Object.values(ITEM_CATALOG)
     .map((item) => item.image)
     .filter((image): image is string => Boolean(image)),

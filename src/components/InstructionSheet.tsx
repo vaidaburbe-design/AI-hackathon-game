@@ -4,14 +4,12 @@ import type { ItemInstance } from "../types/game";
 
 interface InstructionSheetProps {
   items: ItemInstance[];
-  round: number;
   open: boolean;
   onClose: () => void;
 }
 
 export function InstructionSheet({
   items,
-  round,
   open,
   onClose,
 }: InstructionSheetProps) {
@@ -25,8 +23,10 @@ export function InstructionSheet({
         role="dialog"
         aria-label="Collection list"
       >
-        <h2 className="instruction-title doodle-title">Collect these!</h2>
-        <p className="instruction-subtitle">Round {round}</p>
+        <h2 className="instruction-title doodle-title">Collect only these!</h2>
+        <p className="instruction-subtitle">
+          Drag each item into the sort box — quietly!
+        </p>
         <ul className="instruction-list">
           {items.filter(isSortableItem).map((item) => (
             <li
@@ -47,7 +47,6 @@ export function InstructionSheet({
             </li>
           ))}
         </ul>
-        <p className="instruction-hint">Drag each item into the sort box — quietly!</p>
         <button
           type="button"
           className="btn-primary sketch-border instruction-close"

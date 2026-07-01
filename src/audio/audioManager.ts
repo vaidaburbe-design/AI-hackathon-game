@@ -1,4 +1,4 @@
-import type { GameStatus, MonsterStage } from "../types/game";
+import type { GameStatus, LoseReason, MonsterStage } from "../types/game";
 
 const ALARM_CLOCK_PICKUP_SRC = "/sounds/clock_alarm.mp3";
 const BELL_PICKUP_SRC = "/sounds/bell_sound.wav";
@@ -34,6 +34,7 @@ let kettlePickupAudio: HTMLAudioElement | null = null;
 let introShouldPlay = false;
 let snoreShouldPlay = false;
 let audioMuted = false;
+let timeUpAudioPlayed = false;
 
 function getContext(): AudioContext {
   if (!audioCtx) audioCtx = new AudioContext();
@@ -189,6 +190,22 @@ export function playBellPickupSound() {
   const audio = getBellPickupAudio();
   audio.currentTime = 0;
   void audio.play().catch(() => {});
+}
+
+export function playAlarmClockSound() {
+  if (audioMuted) return;
+  unlockAudioContext();
+
+  const ring = () => {
+    const audio = getBellPickupAudio();
+    audio.currentTime = 0;
+    audio.volume = 1;
+    void audio.play().catch(() => {});
+  };
+
+  ring();
+  window.setTimeout(ring, 420);
+  window.setTimeout(ring, 840);
 }
 
 export function playCatPickupSound() {
@@ -444,6 +461,19 @@ function playWakeSting() {
   void audio.play().catch(() => {});
 }
 
+function playClockAlarm() {
+  playAlarmClockSound();
+}
+
+export function playTimeUpAudio() {
+  if (audioMuted || timeUpAudioPlayed) return;
+  timeUpAudioPlayed = true;
+  playClockAlarm();
+  window.setTimeout(() => {
+    playWakeSting();
+  }, 700);
+}
+
 export function resumeGameplayAudio(stage: MonsterStage = "deepSleep") {
   if (audioMuted) return;
   stopIntroMusic();
@@ -451,7 +481,11 @@ export function resumeGameplayAudio(stage: MonsterStage = "deepSleep") {
   updateSnoreForStage(stage);
 }
 
-export function syncGameAudio(status: GameStatus, stage: MonsterStage) {
+export function syncGameAudio(
+  status: GameStatus,
+  stage: MonsterStage,
+  loseReason: LoseReason | null = null,
+) {
   if (audioMuted) {
     introShouldPlay = false;
     snoreShouldPlay = false;
@@ -462,7 +496,11 @@ export function syncGameAudio(status: GameStatus, stage: MonsterStage) {
 
   if (stage === "awake") {
     stopIntroMusic();
-    playWakeSting();
+    if (loseReason === "time") {
+      playTimeUpAudio();
+    } else {
+      playWakeSting();
+    }
     return;
   }
 
@@ -474,6 +512,7 @@ export function syncGameAudio(status: GameStatus, stage: MonsterStage) {
   }
 
   if (status === "playing") {
+    timeUpAudioPlayed = false;
     stopIntroMusic();
     startSnore();
     updateSnoreForStage(stage);

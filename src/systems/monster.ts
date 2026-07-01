@@ -55,6 +55,27 @@ export function settleStage(
   return { stage: noiseToStage(noise), lowNoiseSince: null };
 }
 
+export function getStageMeterFloor(stage: MonsterStage): number {
+  switch (stage) {
+    case "deepSleep":
+      return MONSTER_THRESHOLDS.deepSleep;
+    case "stirring":
+      return MONSTER_THRESHOLDS.stirring;
+    case "suspicious":
+      return MONSTER_THRESHOLDS.suspicious;
+    case "awake":
+      return MONSTER_THRESHOLDS.awake;
+  }
+}
+
+export function getMeterDisplayPercent(
+  noise: number,
+  stage: MonsterStage,
+): number {
+  const floor = getStageMeterFloor(stage);
+  return Math.min(100, Math.max(noise, floor));
+}
+
 export function getStageColor(stage: MonsterStage): string {
   switch (stage) {
     case "deepSleep":

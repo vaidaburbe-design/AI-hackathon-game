@@ -3,7 +3,7 @@ import { Creature } from "./Creature";
 import { CollectedItems } from "./CollectedItems";
 import { DraggableItem } from "./DraggableItem";
 import { SortBox, type SortBoxFeedback } from "./SortBox";
-import { playRejectSound, playSuccessSound } from "../audio/audioManager";
+import { playAlarmClockSound, playRejectSound, playSuccessSound } from "../audio/audioManager";
 import { GAME_CONFIG } from "../config/gameConfig";
 import { useGame } from "../state/GameContext";
 import { isSortableItem } from "../state/gameReducer";
@@ -34,8 +34,17 @@ export function LivingRoom({ state }: LivingRoomProps) {
     if (!item) return;
 
     if (!isSortableItem(item)) {
-      flashFeedback("reject");
-      dispatch({ type: "ADD_NOISE", amount: GAME_CONFIG.rejectNoisePenalty });
+      if (item.id === "alarm-clock") {
+        playAlarmClockSound();
+        dispatch({ type: "ADD_NOISE", amount: GAME_CONFIG.alarmClockRejectNoisePenalty });
+      } else {
+        playRejectSound();
+        dispatch({ type: "ADD_NOISE", amount: GAME_CONFIG.rejectNoisePenalty });
+      }
+
+      setBoxFeedback("reject");
+      if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
+      feedbackTimer.current = setTimeout(() => setBoxFeedback(null), 1000);
       dispatch({ type: "SET_DRAGGING", itemId, dragging: false });
       return;
     }

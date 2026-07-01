@@ -22,7 +22,16 @@ export function GameScreen() {
   const [showLostModal, setShowLostModal] = useState(false);
   const [muted, setMuted] = useState(isAudioMuted);
 
+  const endModalVisible =
+    state.status === "won" || (state.status === "lost" && showLostModal);
+
   useGameLoop();
+
+  useEffect(() => {
+    if (endModalVisible) {
+      setListOpen(false);
+    }
+  }, [endModalVisible]);
 
   useEffect(() => {
     if (state.status === "playing" && prevStatus.current !== "playing") {
@@ -35,8 +44,8 @@ export function GameScreen() {
   }, [state.status]);
 
   useEffect(() => {
-    syncGameAudio(state.status, state.monsterStage);
-  }, [state.monsterStage, state.status]);
+    syncGameAudio(state.status, state.monsterStage, state.loseReason);
+  }, [state.loseReason, state.monsterStage, state.status]);
 
   useEffect(() => {
     if (state.status !== "lost") {
@@ -105,10 +114,9 @@ export function GameScreen() {
             listOpen={listOpen}
           />
           <LivingRoom state={state} />
-          {state.status === "playing" && (
+          {listOpen && !endModalVisible && (
             <InstructionSheet
               items={state.items}
-              round={state.round}
               open={listOpen}
               onClose={() => setListOpen(false)}
             />
@@ -130,6 +138,7 @@ export function GameScreen() {
         <EndScreen
           won={false}
           round={state.round}
+          loseReason={state.loseReason}
           onNextRound={handleNextRound}
           onRetry={handleRetry}
           onRestart={resetGame}

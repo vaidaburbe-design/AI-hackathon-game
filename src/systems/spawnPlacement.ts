@@ -1,39 +1,14 @@
-/** Prefer spawning on the floor and lower furniture — not floating in a single row. */
-export const SPAWN_PREFERRED_Y_MIN = 55;
-
 /** Percent-based zones where draggable items must never spawn (see LivingRoom layout). */
 export const SPAWN_FORBIDDEN_ZONES = [
-  { id: "monster", xMin: 30, xMax: 70, yMin: 32, yMax: 58 },
-  { id: "sortBox", xMin: 22, xMax: 78, yMin: 68, yMax: 98 },
+  { id: "monster", xMin: 28, xMax: 72, yMin: 28, yMax: 62 },
+  { id: "sortBox", xMin: 18, xMax: 82, yMin: 64, yMax: 98 },
 ] as const;
 
-const MIN_ITEM_SPACING = 7;
-
-const FALLBACK_SPAWN_SLOTS: { x: number; y: number }[] = [
-  { x: 8, y: 72 },
-  { x: 12, y: 66 },
-  { x: 16, y: 74 },
-  { x: 20, y: 60 },
-  { x: 24, y: 67 },
-  { x: 10, y: 68 },
-  { x: 18, y: 70 },
-  { x: 88, y: 72 },
-  { x: 92, y: 66 },
-  { x: 86, y: 74 },
-  { x: 82, y: 60 },
-  { x: 78, y: 67 },
-  { x: 90, y: 68 },
-  { x: 94, y: 70 },
-  { x: 14, y: 62 },
-  { x: 88, y: 64 },
-  { x: 6, y: 70 },
-  { x: 96, y: 68 },
-  { x: 22, y: 64 },
-  { x: 76, y: 66 },
-];
+const MIN_ITEM_SPACING = 11;
+const GRID_STEP = 7;
 
 function clampPercent(value: number): number {
-  return Math.max(5, Math.min(95, value));
+  return Math.max(6, Math.min(94, value));
 }
 
 function distance(
@@ -41,6 +16,15 @@ function distance(
   b: { x: number; y: number },
 ): number {
   return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
+function shuffle<T>(items: T[]): T[] {
+  const pool = [...items];
+  for (let i = pool.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool;
 }
 
 export function isInForbiddenSpawnZone(x: number, y: number): boolean {
@@ -63,43 +47,88 @@ export function isValidSpawnPosition(
   return !isInForbiddenSpawnZone(pos.x, pos.y) && !isTooCloseToOthers(pos, occupied);
 }
 
+function buildCandidateSlots(): { x: number; y: number }[] {
+  const slots: { x: number; y: number }[] = [];
+
+  for (let y = 10; y <= 78; y += GRID_STEP) {
+    for (let x = 8; x <= 92; x += GRID_STEP) {
+      if (!isInForbiddenSpawnZone(x, y)) {
+        slots.push({ x, y });
+      }
+    }
+  }
+
+  return slots;
+}
+
+/** Spread items across the whole room with even spacing. */
+export function scatterSpawnPositions(count: number): { x: number; y: number }[] {
+  if (count <= 0) return [];
+
+  const candidates = shuffle(buildCandidateSlots());
+  if (candidates.length === 0) return [];
+
+  const placed: { x: number; y: number }[] = [];
+  const seed = candidates[0];
+  placed.push(seed);
+
+  while (placed.length < count) {
+    let best: { x: number; y: number } | null = null;
+    let bestScore = -1;
+
+    for (const candidate of candidates) {
+      if (!isValidSpawnPosition(candidate, placed)) continue;
+
+      const score = Math.min(...placed.map((point) => distance(point, candidate)));
+      if (score > bestScore) {
+        bestScore = score;
+        best = candidate;
+      }
+    }
+
+    if (!best) break;
+    placed.push(best);
+  }
+
+  if (placed.length < count) {
+    for (const candidate of shuffle(candidates)) {
+      if (placed.length >= count) break;
+      if (isValidSpawnPosition(candidate, placed)) {
+        placed.push(candidate);
+      }
+    }
+  }
+
+  return placed.slice(0, count);
+}
+
 export function resolveSpawnPosition(
   preferred: { x: number; y: number },
   occupied: { x: number; y: number }[] = [],
 ): { x: number; y: number } {
   const clamped = {
     x: clampPercent(preferred.x),
-    y: clampPercent(Math.max(SPAWN_PREFERRED_Y_MIN, preferred.y)),
+    y: clampPercent(preferred.y),
   };
 
   if (isValidSpawnPosition(clamped, occupied)) {
     return clamped;
   }
 
-  const candidates: { x: number; y: number }[] = [];
-
-  for (let radius = 4; radius <= 36; radius += 4) {
-    for (let angle = 0; angle < 360; angle += 22) {
+  for (let radius = GRID_STEP; radius <= 42; radius += GRID_STEP) {
+    for (let angle = 0; angle < 360; angle += 24) {
       const rad = (angle * Math.PI) / 180;
       const candidate = {
         x: clampPercent(clamped.x + Math.cos(rad) * radius),
-        y: clampPercent(
-          Math.max(SPAWN_PREFERRED_Y_MIN, clamped.y + Math.sin(rad) * radius),
-        ),
+        y: clampPercent(clamped.y + Math.sin(rad) * radius),
       };
       if (isValidSpawnPosition(candidate, occupied)) {
-        candidates.push(candidate);
+        return candidate;
       }
     }
   }
 
-  if (candidates.length > 0) {
-    return candidates.reduce((best, candidate) =>
-      candidate.y > best.y ? candidate : best,
-    );
-  }
-
-  for (const slot of FALLBACK_SPAWN_SLOTS) {
+  for (const slot of shuffle(buildCandidateSlots())) {
     if (isValidSpawnPosition(slot, occupied)) {
       return slot;
     }
