@@ -9,12 +9,50 @@ const TYPE_MODIFIERS: Record<ItemType, number> = {
   heavy: 1.1,
 };
 
+type RoomNoiseZone = (typeof GAME_CONFIG.roomNoiseZones)[number];
+
+function pointInZone(zone: RoomNoiseZone, x: number, y: number): boolean {
+  switch (zone.shape) {
+    case "ellipse": {
+      const dx = (x - zone.center.x) / zone.radius.x;
+      const dy = (y - zone.center.y) / zone.radius.y;
+      return dx * dx + dy * dy <= 1;
+    }
+    case "rect":
+      return (
+        x >= zone.x &&
+        x <= zone.x + zone.width &&
+        y >= zone.y &&
+        y <= zone.y + zone.height
+      );
+    case "edge":
+      return (
+        x <= zone.margin ||
+        x >= 100 - zone.margin ||
+        y <= zone.margin ||
+        y >= 100 - zone.margin
+      );
+  }
+}
+
 export function getProximityMultiplier(x: number, y: number): number {
-  const dx = x - GAME_CONFIG.sofaCenter.x;
-  const dy = y - GAME_CONFIG.sofaCenter.y;
-  const distance = Math.sqrt(dx * dx + dy * dy);
-  const t = Math.max(0, 1 - distance / GAME_CONFIG.proximityDangerRadius);
-  return 1 + t * (GAME_CONFIG.proximityMaxMultiplier - 1);
+  let dangerMultiplier = 1;
+  let quietMultiplier = 1;
+
+  for (const zone of GAME_CONFIG.roomNoiseZones) {
+    if (!pointInZone(zone, x, y)) continue;
+
+    if (zone.multiplier >= 1) {
+      dangerMultiplier = Math.max(dangerMultiplier, zone.multiplier);
+    } else {
+      quietMultiplier = Math.min(quietMultiplier, zone.multiplier);
+    }
+  }
+
+  return Math.min(
+    GAME_CONFIG.proximityMaxMultiplier,
+    Math.max(0.3, dangerMultiplier * quietMultiplier),
+  );
 }
 
 export function getSpeedMultiplier(speed: number): number {

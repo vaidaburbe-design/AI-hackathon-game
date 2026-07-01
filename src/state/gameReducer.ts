@@ -1,4 +1,4 @@
-import { GAME_CONFIG } from "../config/gameConfig";
+import { GAME_CONFIG, MONSTER_THRESHOLDS } from "../config/gameConfig";
 import { createRoundItems } from "../data/rounds";
 import { clampNoise, decayNoise } from "../systems/noise";
 import { noiseToStage, settleStage } from "../systems/monster";
@@ -14,6 +14,7 @@ const initialState: GameState = {
   totalItems: 0,
   snorePhase: 0,
   lowNoiseSince: null,
+  highNoiseSince: null,
   isDragging: false,
   decoysByRound: {},
 };
@@ -34,6 +35,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
     case "START_ROUND": {
       const items = action.items;
+      const noise = Math.min(state.noise, 15);
       return {
         ...state,
         status: "playing",
@@ -41,9 +43,10 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         items,
         sortedCount: 0,
         totalItems: countSortable(items),
-        noise: Math.min(state.noise, 15),
-        monsterStage: noiseToStage(Math.min(state.noise, 15)),
+        noise,
+        monsterStage: noiseToStage(noise),
         lowNoiseSince: null,
+        highNoiseSince: null,
         isDragging: false,
         decoysByRound: {
           ...state.decoysByRound,
@@ -54,14 +57,17 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
     case "ADD_NOISE": {
       if (state.status !== "playing") return state;
+      const now = performance.now();
       const noise = clampNoise(state.noise + action.amount);
+      const highNoiseSince = getHighNoiseSince(noise, state.highNoiseSince, now);
       const stage = noiseToStage(noise);
-      if (noise >= GAME_CONFIG.awakeThreshold) {
+      if (shouldWakeMonster(noise, highNoiseSince, now)) {
         return {
           ...state,
           noise,
           monsterStage: "awake",
           status: "lost",
+          highNoiseSince,
           isDragging: false,
           items: state.items.map((i) => ({ ...i, dragging: false })),
         };
@@ -71,6 +77,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         noise,
         monsterStage: stage,
         lowNoiseSince: null,
+        highNoiseSince,
       };
     }
 
@@ -81,6 +88,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       if (!state.isDragging) {
         noise = decayNoise(noise, action.deltaMs);
       }
+      const highNoiseSince = getHighNoiseSince(noise, state.highNoiseSince, now);
       const stageFromNoise = noiseToStage(noise);
       const { stage, lowNoiseSince } = settleStage(
         state.monsterStage,
@@ -95,13 +103,14 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       const snorePhase =
         (state.snorePhase + action.deltaMs * 0.002) % (Math.PI * 2);
 
-      if (noise >= GAME_CONFIG.awakeThreshold) {
+      if (shouldWakeMonster(noise, highNoiseSince, now)) {
         return {
           ...state,
           noise,
           monsterStage: "awake",
           status: "lost",
           snorePhase,
+          highNoiseSince,
           isDragging: false,
           items: state.items.map((i) => ({ ...i, dragging: false })),
         };
@@ -112,6 +121,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         noise,
         monsterStage,
         lowNoiseSince,
+        highNoiseSince,
         snorePhase,
       };
     }
@@ -168,6 +178,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         ...state,
         status: "lost",
         monsterStage: "awake",
+        highNoiseSince: null,
         isDragging: false,
         items: state.items.map((i) => ({ ...i, dragging: false })),
       };
@@ -190,6 +201,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         noise: Math.min(state.noise, 15),
         monsterStage: noiseToStage(Math.min(state.noise, 15)),
         lowNoiseSince: null,
+        highNoiseSince: null,
         isDragging: false,
       };
     }
@@ -220,6 +232,27 @@ const STAGE_RANK = {
   suspicious: 2,
   awake: 3,
 } as const;
+
+function getHighNoiseSince(
+  noise: number,
+  currentHighNoiseSince: number | null,
+  now: number,
+) {
+  if (noise < MONSTER_THRESHOLDS.awake) return null;
+  return currentHighNoiseSince ?? now;
+}
+
+function shouldWakeMonster(
+  noise: number,
+  highNoiseSince: number | null,
+  now: number,
+) {
+  return (
+    noise >= MONSTER_THRESHOLDS.awake &&
+    highNoiseSince !== null &&
+    now - highNoiseSince >= GAME_CONFIG.awakeSustainMs
+  );
+}
 
 function getExcludedDecoyIds(
   decoysByRound: Partial<Record<number, string[]>>,
@@ -277,6 +310,7 @@ export function advanceRound(state: GameState): GameState | null {
     noise: Math.min(state.noise, 10),
     monsterStage: "deepSleep",
     lowNoiseSince: null,
+    highNoiseSince: null,
     isDragging: false,
   };
 }

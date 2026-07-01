@@ -37,6 +37,7 @@ export interface GameState {
   totalItems: number;
   snorePhase: number;
   lowNoiseSince: number | null;
+  highNoiseSince: number | null;
   isDragging: boolean;
   decoysByRound: Partial<Record<number, string[]>>;
 }

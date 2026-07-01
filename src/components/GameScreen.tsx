@@ -13,7 +13,7 @@ import {
   syncGameAudio,
 } from "../audio/audioManager";
 
-const LOST_MODAL_DELAY_MS = 3000;
+const LOST_MODAL_DELAY_MS = 5400;
 
 export function GameScreen() {
   const { state, startGame, nextRound, resetGame, endGame, dispatch } = useGame();
