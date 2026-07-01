@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useCallback } from "react";
 import { Creature } from "./Creature";
 import { CollectedItems } from "./CollectedItems";
 import { DraggableItem } from "./DraggableItem";
@@ -9,6 +9,8 @@ import { useGame } from "../state/GameContext";
 import { isSortableItem } from "../state/gameReducer";
 import type { GameState } from "../types/game";
 
+const SORT_HINT_FADE_MS = 500;
+
 interface LivingRoomProps {
   state: GameState;
 }
@@ -17,8 +19,23 @@ export function LivingRoom({ state }: LivingRoomProps) {
   const roomRef = useRef<HTMLDivElement>(null);
   const sortBoxRef = useRef<HTMLDivElement>(null);
   const feedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hintFadeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [boxFeedback, setBoxFeedback] = useState<SortBoxFeedback>(null);
+  const [sortHintVisible, setSortHintVisible] = useState(true);
+  const [sortHintFading, setSortHintFading] = useState(false);
   const { dispatch } = useGame();
+
+  const dismissSortHint = useCallback(() => {
+    if (!sortHintVisible || sortHintFading) return;
+
+    setSortHintFading(true);
+
+    if (hintFadeTimer.current) clearTimeout(hintFadeTimer.current);
+    hintFadeTimer.current = setTimeout(() => {
+      setSortHintVisible(false);
+      setSortHintFading(false);
+    }, SORT_HINT_FADE_MS);
+  }, [sortHintVisible, sortHintFading]);
 
   const flashFeedback = (feedback: Exclude<SortBoxFeedback, null>) => {
     if (feedback === "reject") playRejectSound();
@@ -30,6 +47,8 @@ export function LivingRoom({ state }: LivingRoomProps) {
   };
 
   const handleDropInBox = (itemId: string) => {
+    dismissSortHint();
+
     const item = state.items.find((entry) => entry.id === itemId);
     if (!item) return;
 
@@ -79,7 +98,12 @@ export function LivingRoom({ state }: LivingRoomProps) {
         />
       ))}
 
-      <SortBox ref={sortBoxRef} feedback={boxFeedback} />
+      <SortBox
+        ref={sortBoxRef}
+        feedback={boxFeedback}
+        showHint={sortHintVisible && state.round === 1}
+        hintFading={sortHintFading}
+      />
     </div>
   );
 }

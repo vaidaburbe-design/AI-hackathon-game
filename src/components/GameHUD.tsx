@@ -1,3 +1,4 @@
+import type { RefObject } from "react";
 import { NoiseMeter } from "./NoiseMeter";
 import { GameClock } from "./GameClock";
 import type { GameState } from "../types/game";
@@ -7,6 +8,7 @@ interface GameHUDProps {
   onEndGame: () => void;
   onToggleList: () => void;
   listOpen: boolean;
+  listButtonRef: RefObject<HTMLButtonElement | null>;
 }
 
 function ListIcon() {
@@ -27,7 +29,7 @@ function EndGameIcon() {
   );
 }
 
-export function GameHUD({ state, onEndGame, onToggleList, listOpen }: GameHUDProps) {
+export function GameHUD({ state, onEndGame, onToggleList, listOpen, listButtonRef }: GameHUDProps) {
   return (
     <header className="game-hud">
       <div className="hud-top">
@@ -44,6 +46,7 @@ export function GameHUD({ state, onEndGame, onToggleList, listOpen }: GameHUDPro
         <NoiseMeter noise={state.noise} stage={state.monsterStage} />
         <div className="hud-actions">
           <button
+            ref={listButtonRef}
             type="button"
             className={`btn-list sketch-border ${listOpen ? "btn-list--active" : ""}`}
             onClick={onToggleList}

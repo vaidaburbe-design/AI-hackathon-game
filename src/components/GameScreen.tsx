@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import { GameHUD } from "./GameHUD";
 import { LivingRoom } from "./LivingRoom";
 import { StartScreen } from "./StartScreen";
 import { EndScreen } from "./EndScreen";
-import { InstructionSheet } from "./InstructionSheet";
+import { InstructionSheet, type ListAnchor } from "./InstructionSheet";
 import { useGame } from "../state/GameContext";
 import { useGameLoop } from "../hooks/useGameLoop";
 import {
@@ -18,9 +18,41 @@ const LOST_MODAL_DELAY_MS = 5400;
 export function GameScreen() {
   const { state, startGame, nextRound, resetGame, endGame, dispatch } = useGame();
   const prevStatus = useRef(state.status);
+  const listButtonRef = useRef<HTMLButtonElement>(null);
   const [listOpen, setListOpen] = useState(false);
+  const [listOpenInstant, setListOpenInstant] = useState(false);
+  const [listAnchor, setListAnchor] = useState<ListAnchor | null>(null);
   const [showLostModal, setShowLostModal] = useState(false);
   const [muted, setMuted] = useState(isAudioMuted);
+
+  const updateListAnchor = useCallback(() => {
+    const button = listButtonRef.current;
+    if (!button) return;
+
+    const rect = button.getBoundingClientRect();
+    setListAnchor({
+      x: rect.left + rect.width / 2,
+      y: rect.top + rect.height / 2,
+    });
+  }, []);
+
+  const handleCloseList = useCallback(() => {
+    updateListAnchor();
+    setListOpen(false);
+  }, [updateListAnchor]);
+
+  const handleToggleList = () => {
+    updateListAnchor();
+    setListOpen((open) => !open);
+  };
+
+  useEffect(() => {
+    if (!listOpen) return;
+
+    updateListAnchor();
+    window.addEventListener("resize", updateListAnchor);
+    return () => window.removeEventListener("resize", updateListAnchor);
+  }, [listOpen, updateListAnchor]);
 
   const endModalVisible =
     state.status === "won" || (state.status === "lost" && showLostModal);
@@ -35,13 +67,18 @@ export function GameScreen() {
 
   useEffect(() => {
     if (state.status === "playing" && prevStatus.current !== "playing") {
+      window.requestAnimationFrame(updateListAnchor);
+      if (prevStatus.current === "idle") {
+        setListOpenInstant(true);
+      }
       setListOpen(true);
     }
     if (state.status === "idle") {
       setListOpen(false);
+      setListOpenInstant(false);
     }
     prevStatus.current = state.status;
-  }, [state.status]);
+  }, [state.status, updateListAnchor]);
 
   useEffect(() => {
     syncGameAudio(state.status, state.monsterStage, state.loseReason);
@@ -110,15 +147,18 @@ export function GameScreen() {
           <GameHUD
             state={state}
             onEndGame={endGame}
-            onToggleList={() => setListOpen((open) => !open)}
+            onToggleList={handleToggleList}
             listOpen={listOpen}
+            listButtonRef={listButtonRef}
           />
           <LivingRoom state={state} />
-          {listOpen && !endModalVisible && (
+          {!endModalVisible && (
             <InstructionSheet
               items={state.items}
               open={listOpen}
-              onClose={() => setListOpen(false)}
+              anchor={listAnchor}
+              instantOpen={listOpenInstant}
+              onClose={handleCloseList}
             />
           )}
         </>
