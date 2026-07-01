@@ -410,7 +410,9 @@ function startSnore() {
   const audio = getSnoreAudio();
   const play = () => {
     if (!snoreShouldPlay || !audio.paused) return;
-    void audio.play().catch(() => {});
+    void audio.play().catch(() => {
+      snoreShouldPlay = false;
+    });
   };
 
   if (audio.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
