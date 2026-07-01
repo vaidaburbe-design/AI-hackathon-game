@@ -1,5 +1,6 @@
 import type { GameStatus, MonsterStage } from "../types/game";
 
+const ALARM_CLOCK_PICKUP_SRC = "/sounds/clock_alarm.mp3";
 const BELL_PICKUP_SRC = "/sounds/bell_sound.wav";
 const BUTTON_CLICK_SRC = "/sounds/button-click.mp3";
 const CAT_PICKUP_SRC = "/sounds/cat_sound.mp3";
@@ -7,11 +8,16 @@ const COINS_PICKUP_SRC = "/sounds/coins_drop.mp3";
 const INTRO_SONG_SRC = "/sounds/intro_song.mp3";
 const KEY_PICKUP_SRC = "/sounds/key_rattle.wav";
 const MONSTER_ROAR_SRC = "/sounds/monster_roar.mp3";
+const MUG_PICKUP_SRC = "/sounds/clink.wav";
 const PACKAGE_PICKUP_SRC = "/sounds/package_sound.mp3";
+const PHONE_PICKUP_SRC = "/sounds/phone_ring.wav";
 const SNORING_SRC = "/sounds/sleeping_breathing.mp3";
+const VACUUM_PICKUP_SRC = "/sounds/hoover.mp3";
+const KETTLE_PICKUP_SRC = "/sounds/kettle-boiling.wav";
 const INTRO_START_TIME = 22;
 
 let audioCtx: AudioContext | null = null;
+let alarmClockPickupAudio: HTMLAudioElement | null = null;
 let bellPickupAudio: HTMLAudioElement | null = null;
 let buttonClickAudio: HTMLAudioElement | null = null;
 let catPickupAudio: HTMLAudioElement | null = null;
@@ -19,8 +25,12 @@ let coinsPickupAudio: HTMLAudioElement | null = null;
 let introAudio: HTMLAudioElement | null = null;
 let keyPickupAudio: HTMLAudioElement | null = null;
 let monsterRoarAudio: HTMLAudioElement | null = null;
+let mugPickupAudio: HTMLAudioElement | null = null;
 let packagePickupAudio: HTMLAudioElement | null = null;
+let phonePickupAudio: HTMLAudioElement | null = null;
 let snoreAudio: HTMLAudioElement | null = null;
+let vacuumPickupAudio: HTMLAudioElement | null = null;
+let kettlePickupAudio: HTMLAudioElement | null = null;
 let introShouldPlay = false;
 let snoreShouldPlay = false;
 let audioMuted = false;
@@ -41,6 +51,14 @@ function getButtonClickAudio(): HTMLAudioElement {
     buttonClickAudio.preload = "auto";
   }
   return buttonClickAudio;
+}
+
+function getAlarmClockPickupAudio(): HTMLAudioElement {
+  if (!alarmClockPickupAudio) {
+    alarmClockPickupAudio = new Audio(ALARM_CLOCK_PICKUP_SRC);
+    alarmClockPickupAudio.preload = "auto";
+  }
+  return alarmClockPickupAudio;
 }
 
 function getBellPickupAudio(): HTMLAudioElement {
@@ -88,6 +106,14 @@ function getKeyPickupAudio(): HTMLAudioElement {
   return keyPickupAudio;
 }
 
+function getMugPickupAudio(): HTMLAudioElement {
+  if (!mugPickupAudio) {
+    mugPickupAudio = new Audio(MUG_PICKUP_SRC);
+    mugPickupAudio.preload = "auto";
+  }
+  return mugPickupAudio;
+}
+
 function getPackagePickupAudio(): HTMLAudioElement {
   if (!packagePickupAudio) {
     packagePickupAudio = new Audio(PACKAGE_PICKUP_SRC);
@@ -96,10 +122,63 @@ function getPackagePickupAudio(): HTMLAudioElement {
   return packagePickupAudio;
 }
 
+function getPhonePickupAudio(): HTMLAudioElement {
+  if (!phonePickupAudio) {
+    phonePickupAudio = new Audio(PHONE_PICKUP_SRC);
+    phonePickupAudio.preload = "auto";
+  }
+  return phonePickupAudio;
+}
+
+function getVacuumPickupAudio(): HTMLAudioElement {
+  if (!vacuumPickupAudio) {
+    vacuumPickupAudio = new Audio(VACUUM_PICKUP_SRC);
+    vacuumPickupAudio.preload = "auto";
+  }
+  return vacuumPickupAudio;
+}
+
+function getKettlePickupAudio(): HTMLAudioElement {
+  if (!kettlePickupAudio) {
+    kettlePickupAudio = new Audio(KETTLE_PICKUP_SRC);
+    kettlePickupAudio.preload = "auto";
+  }
+  return kettlePickupAudio;
+}
+
+function stopAudio(audio: HTMLAudioElement | null) {
+  if (!audio) return;
+  audio.pause();
+  audio.currentTime = 0;
+}
+
+function getItemPickupAudios() {
+  return [
+    alarmClockPickupAudio,
+    bellPickupAudio,
+    catPickupAudio,
+    coinsPickupAudio,
+    keyPickupAudio,
+    kettlePickupAudio,
+    mugPickupAudio,
+    packagePickupAudio,
+    phonePickupAudio,
+    vacuumPickupAudio,
+  ];
+}
+
 export function playButtonClick() {
   if (audioMuted) return;
   unlockAudioContext();
   const audio = getButtonClickAudio();
+  audio.currentTime = 0;
+  void audio.play().catch(() => {});
+}
+
+export function playAlarmClockPickupSound() {
+  if (audioMuted) return;
+  unlockAudioContext();
+  const audio = getAlarmClockPickupAudio();
   audio.currentTime = 0;
   void audio.play().catch(() => {});
 }
@@ -136,12 +215,48 @@ export function playKeyPickupSound() {
   void audio.play().catch(() => {});
 }
 
+export function playMugPickupSound() {
+  if (audioMuted) return;
+  unlockAudioContext();
+  const audio = getMugPickupAudio();
+  audio.currentTime = 0;
+  void audio.play().catch(() => {});
+}
+
 export function playPackagePickupSound() {
   if (audioMuted) return;
   unlockAudioContext();
   const audio = getPackagePickupAudio();
   audio.currentTime = 0;
   void audio.play().catch(() => {});
+}
+
+export function playPhonePickupSound() {
+  if (audioMuted) return;
+  unlockAudioContext();
+  const audio = getPhonePickupAudio();
+  audio.currentTime = 0;
+  void audio.play().catch(() => {});
+}
+
+export function playVacuumPickupSound() {
+  if (audioMuted) return;
+  unlockAudioContext();
+  const audio = getVacuumPickupAudio();
+  audio.currentTime = 0;
+  void audio.play().catch(() => {});
+}
+
+export function playKettlePickupSound() {
+  if (audioMuted) return;
+  unlockAudioContext();
+  const audio = getKettlePickupAudio();
+  audio.currentTime = 0;
+  void audio.play().catch(() => {});
+}
+
+export function stopItemPickupSounds() {
+  getItemPickupAudios().forEach(stopAudio);
 }
 
 export function playRejectSound() {
@@ -195,12 +310,17 @@ export function initButtonClickSound() {
 }
 
 export function preloadGameAudio() {
+  getAlarmClockPickupAudio().load();
   getBellPickupAudio().load();
   getCatPickupAudio().load();
   getCoinsPickupAudio().load();
   getIntroAudio().load();
   getKeyPickupAudio().load();
+  getKettlePickupAudio().load();
+  getMugPickupAudio().load();
   getPackagePickupAudio().load();
+  getPhonePickupAudio().load();
+  getVacuumPickupAudio().load();
   getSnoreAudio().load();
   getMonsterRoarAudio().load();
 }
@@ -363,7 +483,7 @@ export function syncGameAudio(status: GameStatus, stage: MonsterStage) {
 export function setAudioMuted(muted: boolean) {
   audioMuted = muted;
 
-  [bellPickupAudio, buttonClickAudio, catPickupAudio, coinsPickupAudio, introAudio, keyPickupAudio, monsterRoarAudio, packagePickupAudio, snoreAudio].forEach((audio) => {
+  [alarmClockPickupAudio, bellPickupAudio, buttonClickAudio, catPickupAudio, coinsPickupAudio, introAudio, keyPickupAudio, kettlePickupAudio, monsterRoarAudio, mugPickupAudio, packagePickupAudio, phonePickupAudio, snoreAudio, vacuumPickupAudio].forEach((audio) => {
     if (!audio) return;
     audio.muted = muted;
     if (muted) audio.pause();
@@ -372,6 +492,7 @@ export function setAudioMuted(muted: boolean) {
   if (muted) {
     introShouldPlay = false;
     snoreShouldPlay = false;
+    stopItemPickupSounds();
     stopIntroMusic();
     stopSnore();
   }

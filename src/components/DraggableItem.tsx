@@ -4,11 +4,17 @@ import { useDragNoise } from "../hooks/useDragNoise";
 import { getProximityMultiplier } from "../systems/noise";
 import { getItemImage } from "../data/items";
 import {
+  playAlarmClockPickupSound,
   playBellPickupSound,
   playCatPickupSound,
   playCoinsPickupSound,
+  playKettlePickupSound,
   playKeyPickupSound,
+  playMugPickupSound,
   playPackagePickupSound,
+  playPhonePickupSound,
+  stopItemPickupSounds,
+  playVacuumPickupSound,
 } from "../audio/audioManager";
 import { GAME_CONFIG } from "../config/gameConfig";
 import type { ItemInstance } from "../types/game";
@@ -62,13 +68,19 @@ export function DraggableItem({
     if (item.sorted) return;
     e.preventDefault();
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    stopItemPickupSounds();
+    if (item.id === "alarm-clock") playAlarmClockPickupSound();
     if (item.id === "cat") {
       playCatPickupSound();
       dispatch({ type: "ADD_NOISE", amount: GAME_CONFIG.catPickupNoisePenalty });
     }
     if (item.id === "chips") playPackagePickupSound();
     if (item.id === "coins") playCoinsPickupSound();
+    if (item.id === "kettle") playKettlePickupSound();
     if (item.id === "keys") playKeyPickupSound();
+    if (item.id === "mug") playMugPickupSound();
+    if (item.id === "phone") playPhonePickupSound();
+    if (item.id === "vacuum") playVacuumPickupSound();
     if (item.id === "bell") {
       playBellPickupSound();
       dispatch({ type: "ADD_NOISE", amount: GAME_CONFIG.bellPickupNoisePenalty });
@@ -99,6 +111,7 @@ export function DraggableItem({
   };
 
   const handlePointerUp = (e: React.PointerEvent) => {
+    stopItemPickupSounds();
     if (!item.dragging) return;
     if (isOverSortBox(e.clientX, e.clientY)) {
       onDropInBox(item.id);
