@@ -1,18 +1,13 @@
 import { resolveSpawnPosition } from "../systems/spawnPlacement";
 import { pickDecoysForRound } from "./decoys";
-import { ITEM_CATALOG, getItem } from "./items";
-import type { ItemInstance, ItemNoiseLevel } from "../types/game";
-
-interface RoundItemGroup {
-  noiseLevels: ItemNoiseLevel[];
-  count: number;
-}
+import { getItem } from "./items";
+import type { ItemInstance } from "../types/game";
 
 export interface RoundDefinition {
   round: number;
   title: string;
   description: string;
-  itemGroups: RoundItemGroup[];
+  sortableItemIds: string[];
   positionOverrides?: Record<string, { x: number; y: number }>;
 }
 
@@ -20,78 +15,55 @@ export const ROUNDS: RoundDefinition[] = [
   {
     round: 1,
     title: "Round 1 — Whisper",
-    description: "Mostly quiet items, with one small step up in noise.",
-    itemGroups: [
-      { noiseLevels: [1], count: 3 },
-      { noiseLevels: [2], count: 1 },
-    ],
+    description: "Quiet items scattered everywhere — learn the room.",
+    sortableItemIds: ["hoodie", "pillow", "banana", "sock"],
     positionOverrides: {
-      hoodie: { x: 80, y: 24 },
-      pillow: { x: 15, y: 28 },
-      banana: { x: 25, y: 36 },
-      sock: { x: 75, y: 74 },
+      hoodie: { x: 90, y: 62 },
+      pillow: { x: 12, y: 68 },
+      banana: { x: 20, y: 66 },
+      sock: { x: 88, y: 72 },
+      bell: { x: 8, y: 74 },
+      chips: { x: 18, y: 64 },
+      cat: { x: 92, y: 66 },
+      sponge: { x: 10, y: 60 },
+      blanket: { x: 78, y: 66 },
     },
   },
   {
     round: 2,
     title: "Round 2 — Closer",
-    description: "Medium-noise items with one riskier object.",
-    itemGroups: [
-      { noiseLevels: [2, 3], count: 3 },
-      { noiseLevels: [4], count: 1 },
-    ],
+    description: "More clutter, trickier objects near the sofa.",
+    sortableItemIds: ["notebook", "wallet", "remote", "charger"],
     positionOverrides: {
-      remote: { x: 20, y: 40 },
-      charger: { x: 68, y: 58 },
-      notebook: { x: 75, y: 35 },
-      wallet: { x: 48, y: 45 },
+      notebook: { x: 88, y: 60 },
+      wallet: { x: 14, y: 62 },
+      remote: { x: 20, y: 70 },
+      charger: { x: 86, y: 68 },
+      phone: { x: 8, y: 66 },
+      candle: { x: 92, y: 58 },
+      lamp: { x: 12, y: 74 },
+      plate: { x: 24, y: 67 },
+      broom: { x: 94, y: 72 },
     },
   },
   {
     round: 3,
     title: "Round 3 — Tense",
-    description: "High-noise objects that punish careless movement.",
-    itemGroups: [
-      { noiseLevels: [3, 4], count: 2 },
-      { noiseLevels: [5], count: 2 },
-    ],
+    description: "The room is packed — loud items everywhere.",
+    sortableItemIds: ["keys", "mug", "laptop", "coins"],
     positionOverrides: {
-      keys: { x: 42, y: 62 },
-      mug: { x: 35, y: 55 },
-      laptop: { x: 58, y: 68 },
-      coins: { x: 52, y: 50 },
+      keys: { x: 16, y: 70 },
+      mug: { x: 28, y: 66 },
+      laptop: { x: 82, y: 74 },
+      coins: { x: 22, y: 64 },
+      vacuum: { x: 6, y: 72 },
+      "alarm-clock": { x: 90, y: 62 },
+      teapot: { x: 76, y: 66 },
+      kettle: { x: 88, y: 70 },
+      pot: { x: 10, y: 68 },
     },
   },
 ];
-
-function shuffle<T>(items: T[]): T[] {
-  const pool = [...items];
-  for (let i = pool.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [pool[i], pool[j]] = [pool[j], pool[i]];
-  }
-  return pool;
-}
-
-function pickItemIdsForRound(round: RoundDefinition): string[] {
-  const picked = new Set<string>();
-
-  return round.itemGroups.flatMap((group) => {
-    const candidates = Object.values(ITEM_CATALOG)
-      .filter((item) => item.sortable !== false)
-      .filter((item) => group.noiseLevels.includes(item.noiseLevel))
-      .filter((item) => !picked.has(item.id));
-
-    const selected = shuffle(candidates).slice(0, group.count);
-    selected.forEach((item) => picked.add(item.id));
-
-    if (selected.length < group.count) {
-      throw new Error(`Not enough items for round ${round.round}`);
-    }
-
-    return selected.map((item) => item.id);
-  });
-}
 
 export function createRoundItems(
   roundNumber: number,
@@ -101,9 +73,8 @@ export function createRoundItems(
   if (!round) throw new Error(`Unknown round: ${roundNumber}`);
 
   const occupied: { x: number; y: number }[] = [];
-  const itemIds = pickItemIdsForRound(round);
 
-  const sortableItems = itemIds.map((id) => {
+  const sortableItems = round.sortableItemIds.map((id) => {
     const def = getItem(id);
     const preferred = round.positionOverrides?.[id] ?? def.position;
     const position = resolveSpawnPosition(preferred, occupied);
@@ -119,7 +90,8 @@ export function createRoundItems(
 
   const decoyItems = pickDecoysForRound(roundNumber, excludeDecoyIds).map((id) => {
     const def = getItem(id);
-    const position = resolveSpawnPosition(def.position, occupied);
+    const preferred = round.positionOverrides?.[id] ?? def.position;
+    const position = resolveSpawnPosition(preferred, occupied);
     occupied.push(position);
 
     return {
