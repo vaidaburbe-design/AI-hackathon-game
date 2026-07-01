@@ -1,4 +1,3 @@
-import { getRoundDefinition } from "../data/rounds";
 import { getItemImage } from "../data/items";
 import { isSortableItem } from "../state/gameReducer";
 import type { ItemInstance } from "../types/game";
@@ -18,8 +17,6 @@ export function InstructionSheet({
 }: InstructionSheetProps) {
   if (!open) return null;
 
-  const roundDef = getRoundDefinition(round);
-
   return (
     <div className="instruction-overlay" onClick={onClose}>
       <div
@@ -29,7 +26,7 @@ export function InstructionSheet({
         aria-label="Collection list"
       >
         <h2 className="instruction-title doodle-title">Collect these!</h2>
-        <p className="instruction-subtitle">{roundDef.title}</p>
+        <p className="instruction-subtitle">Round {round}</p>
         <ul className="instruction-list">
           {items.filter(isSortableItem).map((item) => (
             <li

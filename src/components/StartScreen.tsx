@@ -1,4 +1,9 @@
-import { unlockAudioContext, preloadGameAudio, resumeGameplayAudio } from "../audio/audioManager";
+import {
+  preloadGameAudio,
+  resumeGameplayAudio,
+  stopIntroMusic,
+  unlockAudioContext,
+} from "../audio/audioManager";
 
 interface StartScreenProps {
   onStart: () => void;
@@ -8,6 +13,7 @@ export function StartScreen({ onStart }: StartScreenProps) {
   const handleStart = () => {
     unlockAudioContext();
     preloadGameAudio();
+    stopIntroMusic();
     onStart();
     resumeGameplayAudio("deepSleep");
   };

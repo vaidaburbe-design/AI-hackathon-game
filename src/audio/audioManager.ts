@@ -1,14 +1,29 @@
 import type { GameStatus, MonsterStage } from "../types/game";
 
+const BELL_PICKUP_SRC = "/sounds/bell_sound.wav";
 const BUTTON_CLICK_SRC = "/sounds/button-click.mp3";
+const CAT_PICKUP_SRC = "/sounds/cat_sound.mp3";
+const COINS_PICKUP_SRC = "/sounds/coins_drop.mp3";
+const INTRO_SONG_SRC = "/sounds/intro_song.mp3";
+const KEY_PICKUP_SRC = "/sounds/key_rattle.wav";
 const MONSTER_ROAR_SRC = "/sounds/monster_roar.mp3";
-const SNORING_SRC = "/sounds/snoring-loop.wav";
+const PACKAGE_PICKUP_SRC = "/sounds/package_sound.mp3";
+const SNORING_SRC = "/sounds/sleeping_breathing.mp3";
+const INTRO_START_TIME = 22;
 
 let audioCtx: AudioContext | null = null;
+let bellPickupAudio: HTMLAudioElement | null = null;
 let buttonClickAudio: HTMLAudioElement | null = null;
+let catPickupAudio: HTMLAudioElement | null = null;
+let coinsPickupAudio: HTMLAudioElement | null = null;
+let introAudio: HTMLAudioElement | null = null;
+let keyPickupAudio: HTMLAudioElement | null = null;
 let monsterRoarAudio: HTMLAudioElement | null = null;
+let packagePickupAudio: HTMLAudioElement | null = null;
 let snoreAudio: HTMLAudioElement | null = null;
+let introShouldPlay = false;
 let snoreShouldPlay = false;
+let audioMuted = false;
 
 function getContext(): AudioContext {
   if (!audioCtx) audioCtx = new AudioContext();
@@ -28,14 +43,109 @@ function getButtonClickAudio(): HTMLAudioElement {
   return buttonClickAudio;
 }
 
+function getBellPickupAudio(): HTMLAudioElement {
+  if (!bellPickupAudio) {
+    bellPickupAudio = new Audio(BELL_PICKUP_SRC);
+    bellPickupAudio.preload = "auto";
+  }
+  return bellPickupAudio;
+}
+
+function getIntroAudio(): HTMLAudioElement {
+  if (!introAudio) {
+    introAudio = new Audio(INTRO_SONG_SRC);
+    introAudio.preload = "auto";
+    introAudio.addEventListener("ended", () => {
+      if (!introShouldPlay || !introAudio) return;
+      introAudio.currentTime = INTRO_START_TIME;
+      void introAudio.play().catch(() => {});
+    });
+  }
+  return introAudio;
+}
+
+function getCatPickupAudio(): HTMLAudioElement {
+  if (!catPickupAudio) {
+    catPickupAudio = new Audio(CAT_PICKUP_SRC);
+    catPickupAudio.preload = "auto";
+  }
+  return catPickupAudio;
+}
+
+function getCoinsPickupAudio(): HTMLAudioElement {
+  if (!coinsPickupAudio) {
+    coinsPickupAudio = new Audio(COINS_PICKUP_SRC);
+    coinsPickupAudio.preload = "auto";
+  }
+  return coinsPickupAudio;
+}
+
+function getKeyPickupAudio(): HTMLAudioElement {
+  if (!keyPickupAudio) {
+    keyPickupAudio = new Audio(KEY_PICKUP_SRC);
+    keyPickupAudio.preload = "auto";
+  }
+  return keyPickupAudio;
+}
+
+function getPackagePickupAudio(): HTMLAudioElement {
+  if (!packagePickupAudio) {
+    packagePickupAudio = new Audio(PACKAGE_PICKUP_SRC);
+    packagePickupAudio.preload = "auto";
+  }
+  return packagePickupAudio;
+}
+
 export function playButtonClick() {
+  if (audioMuted) return;
   unlockAudioContext();
   const audio = getButtonClickAudio();
   audio.currentTime = 0;
   void audio.play().catch(() => {});
 }
 
+export function playBellPickupSound() {
+  if (audioMuted) return;
+  unlockAudioContext();
+  const audio = getBellPickupAudio();
+  audio.currentTime = 0;
+  void audio.play().catch(() => {});
+}
+
+export function playCatPickupSound() {
+  if (audioMuted) return;
+  unlockAudioContext();
+  const audio = getCatPickupAudio();
+  audio.currentTime = 0;
+  void audio.play().catch(() => {});
+}
+
+export function playCoinsPickupSound() {
+  if (audioMuted) return;
+  unlockAudioContext();
+  const audio = getCoinsPickupAudio();
+  audio.currentTime = 0;
+  void audio.play().catch(() => {});
+}
+
+export function playKeyPickupSound() {
+  if (audioMuted) return;
+  unlockAudioContext();
+  const audio = getKeyPickupAudio();
+  audio.currentTime = 0;
+  void audio.play().catch(() => {});
+}
+
+export function playPackagePickupSound() {
+  if (audioMuted) return;
+  unlockAudioContext();
+  const audio = getPackagePickupAudio();
+  audio.currentTime = 0;
+  void audio.play().catch(() => {});
+}
+
 export function playRejectSound() {
+  if (audioMuted) return;
   unlockAudioContext();
   const ctx = getContext();
   const osc = ctx.createOscillator();
@@ -52,6 +162,7 @@ export function playRejectSound() {
 }
 
 export function playSuccessSound() {
+  if (audioMuted) return;
   unlockAudioContext();
   const ctx = getContext();
   const osc = ctx.createOscillator();
@@ -72,7 +183,11 @@ export function initButtonClickSound() {
     "click",
     (event) => {
       const button = (event.target as Element).closest("button");
-      if (!button || button.classList.contains("draggable-item")) return;
+      if (
+        !button ||
+        button.classList.contains("draggable-item") ||
+        button.classList.contains("mute-toggle")
+      ) return;
       playButtonClick();
     },
     true,
@@ -80,13 +195,53 @@ export function initButtonClickSound() {
 }
 
 export function preloadGameAudio() {
+  getBellPickupAudio().load();
+  getCatPickupAudio().load();
+  getCoinsPickupAudio().load();
+  getIntroAudio().load();
+  getKeyPickupAudio().load();
+  getPackagePickupAudio().load();
   getSnoreAudio().load();
   getMonsterRoarAudio().load();
 }
 
 export function stopGameAudio() {
+  introShouldPlay = false;
   snoreShouldPlay = false;
+  stopIntroMusic();
   stopSnore();
+}
+
+export function playIntroMusic() {
+  if (audioMuted) return;
+  unlockAudioContext();
+  introShouldPlay = true;
+
+  const audio = getIntroAudio();
+  audio.loop = false;
+
+  const play = () => {
+    if (!introShouldPlay || !audio.paused) return;
+    audio.currentTime = INTRO_START_TIME;
+    void audio.play().catch(() => {});
+  };
+
+  if (audio.readyState >= HTMLMediaElement.HAVE_METADATA) {
+    play();
+    return;
+  }
+
+  audio.addEventListener("loadedmetadata", play, { once: true });
+  if (audio.networkState === HTMLMediaElement.NETWORK_EMPTY) {
+    audio.load();
+  }
+}
+
+export function stopIntroMusic() {
+  introShouldPlay = false;
+  if (!introAudio) return;
+  introAudio.pause();
+  introAudio.currentTime = INTRO_START_TIME;
 }
 
 function getSnoreAudio(): HTMLAudioElement {
@@ -110,6 +265,8 @@ function stopSnore() {
 }
 
 function startSnore() {
+  if (audioMuted) return;
+  stopIntroMusic();
   unlockAudioContext();
   snoreShouldPlay = true;
 
@@ -157,6 +314,7 @@ function getMonsterRoarAudio(): HTMLAudioElement {
 }
 
 function playWakeSting() {
+  if (audioMuted) return;
   unlockAudioContext();
   snoreShouldPlay = false;
   stopSnore();
@@ -167,12 +325,23 @@ function playWakeSting() {
 }
 
 export function resumeGameplayAudio(stage: MonsterStage = "deepSleep") {
+  if (audioMuted) return;
+  stopIntroMusic();
   startSnore();
   updateSnoreForStage(stage);
 }
 
 export function syncGameAudio(status: GameStatus, stage: MonsterStage) {
+  if (audioMuted) {
+    introShouldPlay = false;
+    snoreShouldPlay = false;
+    stopIntroMusic();
+    stopSnore();
+    return;
+  }
+
   if (stage === "awake") {
+    stopIntroMusic();
     playWakeSting();
     return;
   }
@@ -180,11 +349,34 @@ export function syncGameAudio(status: GameStatus, stage: MonsterStage) {
   if (status === "idle") {
     snoreShouldPlay = false;
     stopSnore();
+    playIntroMusic();
     return;
   }
 
   if (status === "playing") {
+    stopIntroMusic();
     startSnore();
     updateSnoreForStage(stage);
   }
+}
+
+export function setAudioMuted(muted: boolean) {
+  audioMuted = muted;
+
+  [bellPickupAudio, buttonClickAudio, catPickupAudio, coinsPickupAudio, introAudio, keyPickupAudio, monsterRoarAudio, packagePickupAudio, snoreAudio].forEach((audio) => {
+    if (!audio) return;
+    audio.muted = muted;
+    if (muted) audio.pause();
+  });
+
+  if (muted) {
+    introShouldPlay = false;
+    snoreShouldPlay = false;
+    stopIntroMusic();
+    stopSnore();
+  }
+}
+
+export function isAudioMuted() {
+  return audioMuted;
 }

@@ -4,6 +4,7 @@ import { CollectedItems } from "./CollectedItems";
 import { DraggableItem } from "./DraggableItem";
 import { SortBox, type SortBoxFeedback } from "./SortBox";
 import { playRejectSound, playSuccessSound } from "../audio/audioManager";
+import { GAME_CONFIG } from "../config/gameConfig";
 import { useGame } from "../state/GameContext";
 import { isSortableItem } from "../state/gameReducer";
 import type { GameState } from "../types/game";
@@ -34,6 +35,7 @@ export function LivingRoom({ state }: LivingRoomProps) {
 
     if (!isSortableItem(item)) {
       flashFeedback("reject");
+      dispatch({ type: "ADD_NOISE", amount: GAME_CONFIG.rejectNoisePenalty });
       dispatch({ type: "SET_DRAGGING", itemId, dragging: false });
       return;
     }

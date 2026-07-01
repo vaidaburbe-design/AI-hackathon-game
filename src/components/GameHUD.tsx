@@ -1,5 +1,4 @@
 import { NoiseMeter } from "./NoiseMeter";
-import { getRoundDefinition } from "../data/rounds";
 import type { GameState } from "../types/game";
 
 interface GameHUDProps {
@@ -10,15 +9,15 @@ interface GameHUDProps {
 }
 
 export function GameHUD({ state, onEndGame, onToggleList, listOpen }: GameHUDProps) {
-  const roundDef = getRoundDefinition(state.round);
-
   return (
     <header className="game-hud">
       <div className="hud-top">
-        <div>
-          <h1 className="game-title doodle-title">Keep It Quiet</h1>
-          <p className="round-info">{roundDef.title}</p>
+        <div className="hud-title-wrap">
+          <h1 className="game-title doodle-title">Keep It Quiet · Round {state.round}</h1>
         </div>
+      </div>
+      <div className="hud-controls">
+        <NoiseMeter noise={state.noise} />
         <div className="hud-actions">
           {state.status === "playing" && (
             <button
@@ -41,7 +40,6 @@ export function GameHUD({ state, onEndGame, onToggleList, listOpen }: GameHUDPro
           )}
         </div>
       </div>
-      <NoiseMeter noise={state.noise} stage={state.monsterStage} />
     </header>
   );
 }
