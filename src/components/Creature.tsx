@@ -1,9 +1,9 @@
 import { useEffect, useRef } from "react";
 import type { MonsterStage } from "../types/game";
 
-const SLEEPING_MP4 = "/creature/sleeping.mp4";
-const OPENS_EYES_MP4 = "/creature/opens-eyes.mp4";
-const SITUP_MP4 = "/creature/waking-up.mp4";
+const SLEEPING_MP4 = "/creature/sleeping_new.mp4";
+const OPENS_EYES_MP4 = "/creature/opens-eyes_new.mp4";
+const SITUP_MP4 = "/creature/waking-up_new.mp4";
 
 const SITUP_CROP = {
   x: 0 / 1468,

@@ -25,11 +25,11 @@ const BACKGROUND_IMAGE_SOURCES = [
   "/creature/round-win-check.png",
 ];
 
-const CRITICAL_VIDEO_SOURCES = ["/creature/sleeping.mp4"];
+const CRITICAL_VIDEO_SOURCES = ["/creature/sleeping_new.mp4"];
 
 const BACKGROUND_VIDEO_SOURCES = [
-  "/creature/opens-eyes.mp4",
-  "/creature/waking-up.mp4",
+  "/creature/opens-eyes_new.mp4",
+  "/creature/waking-up_new.mp4",
 ];
 
 function preloadImage(src: string) {
