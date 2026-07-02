@@ -269,6 +269,11 @@ function drawSitUpFrame(
   ctx.putImageData(imageData, keyX, keyY);
 }
 
+function ensureVideoPlaying(video: HTMLVideoElement) {
+  if (!video.paused || video.readyState < 2) return;
+  void video.play().catch(() => {});
+}
+
 export function Creature({ stage, snorePhase }: CreatureProps) {
   const sleepVideoRef = useRef<HTMLVideoElement>(null);
   const barelyAwakeVideoRef = useRef<HTMLVideoElement>(null);
@@ -406,14 +411,17 @@ export function Creature({ stage, snorePhase }: CreatureProps) {
 
     const drawFrame = () => {
       if (sleepVideo.readyState >= 2) {
+        if (sleepVisible) ensureVideoPlaying(sleepVideo);
         drawSleepStyleFrame(sleepVideo, sleepCanvas, sleepCtx, sleepSize);
       }
 
       if (barelyVideo.readyState >= 2) {
+        if (barelyAwakeVisible) ensureVideoPlaying(barelyVideo);
         drawSleepStyleFrame(barelyVideo, barelyCanvas, barelyCtx, barelySize);
       }
 
       if (sitUpVideo.readyState >= 2) {
+        if (sitUpVisible) ensureVideoPlaying(sitUpVideo);
         drawSitUpFrame(sitUpVideo, sitUpCanvas, sitUpCtx, sitUpSize);
       }
 
