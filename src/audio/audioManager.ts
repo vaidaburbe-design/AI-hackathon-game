@@ -342,6 +342,10 @@ export function preloadGameAudio() {
   getMonsterRoarAudio().load();
 }
 
+export function preloadIntroAudio() {
+  getIntroAudio().load();
+}
+
 export function stopGameAudio() {
   introShouldPlay = false;
   snoreShouldPlay = false;

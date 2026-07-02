@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
+  playIntroMusic,
+  preloadIntroAudio,
   preloadGameAudio,
   resumeGameplayAudio,
   unlockAudioContext,
@@ -12,6 +14,25 @@ interface StartScreenProps {
 
 export function StartScreen({ onStart }: StartScreenProps) {
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    preloadIntroAudio();
+    playIntroMusic();
+
+    const startIntroOnGesture = () => {
+      playIntroMusic();
+    };
+
+    window.addEventListener("click", startIntroOnGesture);
+    window.addEventListener("touchstart", startIntroOnGesture, { passive: true });
+    window.addEventListener("keydown", startIntroOnGesture);
+
+    return () => {
+      window.removeEventListener("click", startIntroOnGesture);
+      window.removeEventListener("touchstart", startIntroOnGesture);
+      window.removeEventListener("keydown", startIntroOnGesture);
+    };
+  }, []);
 
   const handleStart = async () => {
     if (loading) return;
